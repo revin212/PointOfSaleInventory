@@ -1,0 +1,404 @@
+<!DOCTYPE html>
+
+<html class="light" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Precision Ledger - Owner Dashboard</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    "colors": {
+                        "surface-container": "#e5eeff",
+                        "primary": "#006c49",
+                        "on-secondary": "#ffffff",
+                        "on-tertiary-fixed-variant": "#842225",
+                        "outline": "#6c7a71",
+                        "on-primary-container": "#00422b",
+                        "on-surface": "#0b1c30",
+                        "inverse-on-surface": "#eaf1ff",
+                        "on-tertiary-fixed": "#410005",
+                        "on-error-container": "#93000a",
+                        "on-primary": "#ffffff",
+                        "tertiary-fixed": "#ffdad7",
+                        "on-error": "#ffffff",
+                        "primary-fixed": "#6ffbbe",
+                        "on-primary-fixed-variant": "#005236",
+                        "surface-container-lowest": "#ffffff",
+                        "surface-container-high": "#dce9ff",
+                        "on-tertiary-container": "#711419",
+                        "on-secondary-container": "#3c6c54",
+                        "primary-container": "#10b981",
+                        "on-tertiary": "#ffffff",
+                        "secondary": "#376850",
+                        "surface-dim": "#cbdbf5",
+                        "on-surface-variant": "#3c4a42",
+                        "error-container": "#ffdad6",
+                        "on-secondary-fixed": "#002113",
+                        "secondary-container": "#b7ebce",
+                        "surface": "#f8f9ff",
+                        "on-background": "#0b1c30",
+                        "on-primary-fixed": "#002113",
+                        "secondary-fixed": "#baeed1",
+                        "inverse-primary": "#4edea3",
+                        "tertiary-container": "#fc7c78",
+                        "secondary-fixed-dim": "#9ed2b5",
+                        "outline-variant": "#bbcabf",
+                        "primary-fixed-dim": "#4edea3",
+                        "error": "#ba1a1a",
+                        "surface-container-highest": "#d3e4fe",
+                        "surface-tint": "#006c49",
+                        "surface-container-low": "#eff4ff",
+                        "surface-variant": "#d3e4fe",
+                        "tertiary": "#a43a3a",
+                        "tertiary-fixed-dim": "#ffb3af",
+                        "inverse-surface": "#213145",
+                        "on-secondary-fixed-variant": "#1e4f3a",
+                        "background": "#f8f9ff",
+                        "surface-bright": "#f8f9ff"
+                    },
+                    "borderRadius": {
+                        "DEFAULT": "0.125rem",
+                        "lg": "0.25rem",
+                        "xl": "0.5rem",
+                        "full": "0.75rem"
+                    },
+                    "fontFamily": {
+                        "headline": ["Inter"],
+                        "body": ["Inter"],
+                        "label": ["Inter"]
+                    }
+                },
+            },
+        }
+    </script>
+<style>
+        body { font-family: 'Inter', sans-serif; }
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        }
+        .glass-panel {
+            background: rgba(255, 255, 255, 0.8);
+            backdrop-filter: blur(12px);
+        }
+    </style>
+</head>
+<body class="bg-surface text-on-surface antialiased">
+<!-- SideNavBar -->
+<aside class="h-full w-64 fixed left-0 top-0 border-r-0 bg-slate-50 dark:bg-slate-950 flex flex-col py-6 px-4 z-50">
+<div class="mb-10 px-2 flex items-center gap-3">
+<div class="w-10 h-10 rounded-xl bg-primary flex items-center justify-center text-on-primary">
+<span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 1;">precision_manufacturing</span>
+</div>
+<div>
+<h1 class="text-lg font-bold tracking-tight text-emerald-700 dark:text-emerald-400">Precision Ledger</h1>
+<p class="text-[10px] text-on-surface-variant/60 font-medium uppercase tracking-widest">Smart POS System</p>
+</div>
+</div>
+<nav class="flex-1 space-y-1">
+<!-- Active Tab: Dashboard -->
+<a class="flex items-center gap-3 px-4 py-2 text-emerald-700 dark:text-emerald-400 bg-emerald-50 dark:bg-emerald-950/50 rounded-lg font-semibold transition-all" href="#">
+<span class="material-symbols-outlined">dashboard</span>
+<span class="text-sm">Dashboard</span>
+</a>
+<a class="flex items-center gap-3 px-4 py-2 text-slate-600 dark:text-slate-400 hover:bg-emerald-50 dark:hover:bg-emerald-900/30 transition-colors" href="#">
+<span class="material-symbols-outlined">point_of_sale</span>
+<span class="text-sm">POS</span>
+</a>
+<a class="flex items-center gap-3 px-4 py-2 text-slate-600 dark:text-slate-400 hover:bg-emerald-50 dark:hover:bg-emerald-900/30 transition-colors" href="#">
+<span class="material-symbols-outlined">receipt_long</span>
+<span class="text-sm">Sales History</span>
+</a>
+<a class="flex items-center gap-3 px-4 py-2 text-slate-600 dark:text-slate-400 hover:bg-emerald-50 dark:hover:bg-emerald-900/30 transition-colors" href="#">
+<span class="material-symbols-outlined">inventory_2</span>
+<span class="text-sm">Products</span>
+</a>
+<a class="flex items-center gap-3 px-4 py-2 text-slate-600 dark:text-slate-400 hover:bg-emerald-50 dark:hover:bg-emerald-900/30 transition-colors" href="#">
+<span class="material-symbols-outlined">warehouse</span>
+<span class="text-sm">Inventory</span>
+</a>
+<a class="flex items-center gap-3 px-4 py-2 text-slate-600 dark:text-slate-400 hover:bg-emerald-50 dark:hover:bg-emerald-900/30 transition-colors" href="#">
+<span class="material-symbols-outlined">analytics</span>
+<span class="text-sm">Reports</span>
+</a>
+</nav>
+<div class="mt-auto pt-6 space-y-1 border-t border-slate-200/50">
+<button class="w-full mb-4 py-3 px-4 bg-gradient-to-br from-primary to-primary-container text-on-primary rounded-xl font-bold flex items-center justify-center gap-2 shadow-sm active:scale-95 transition-all">
+<span class="material-symbols-outlined text-sm">add_circle</span>
+                New Sale
+            </button>
+<a class="flex items-center gap-3 px-4 py-2 text-slate-600 dark:text-slate-400 hover:bg-emerald-50 dark:hover:bg-emerald-900/30 transition-colors" href="#">
+<span class="material-symbols-outlined">settings</span>
+<span class="text-sm">Settings</span>
+</a>
+<a class="flex items-center gap-3 px-4 py-2 text-slate-600 dark:text-slate-400 hover:bg-emerald-50 dark:hover:bg-emerald-900/30 transition-colors" href="#">
+<span class="material-symbols-outlined">help_outline</span>
+<span class="text-sm">Support</span>
+</a>
+</div>
+</aside>
+<!-- TopNavBar -->
+<header class="fixed top-0 right-0 z-40 bg-white/80 dark:bg-slate-950/80 backdrop-blur-md border-b border-slate-200/50 dark:border-slate-800/50 flex items-center justify-between w-[calc(100%-16rem)] ml-64 h-16 px-8">
+<div class="flex items-center gap-4 flex-1 max-w-xl">
+<div class="relative w-full">
+<span class="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 text-lg">search</span>
+<input class="w-full bg-surface-container-low border-none rounded-full pl-10 pr-4 py-2 text-sm focus:ring-2 focus:ring-primary/20 placeholder:text-slate-400" placeholder="Search orders, products, or customers..." type="text"/>
+</div>
+</div>
+<div class="flex items-center gap-6">
+<div class="flex items-center gap-4 text-slate-500">
+<button class="material-symbols-outlined hover:text-primary transition-colors">notifications</button>
+<button class="material-symbols-outlined hover:text-primary transition-colors">barcode_scanner</button>
+<button class="material-symbols-outlined hover:text-primary transition-colors">history</button>
+</div>
+<div class="h-8 w-[1px] bg-slate-200"></div>
+<div class="flex items-center gap-3">
+<div class="text-right hidden sm:block">
+<p class="text-xs font-bold text-on-surface">Budi Santoso</p>
+<p class="text-[10px] text-on-surface-variant font-medium">Store Owner</p>
+</div>
+<img alt="Owner Profile" class="w-10 h-10 rounded-full object-cover border-2 border-emerald-500" data-alt="Close-up portrait of a professional male business owner in a clean office setting with soft natural window lighting" src="https://lh3.googleusercontent.com/aida-public/AB6AXuDbVDs6hz7CPf2NSiS0Z2Z1QKR0kQnWnrr7XWRdZpMs4tSJmnDVvH-T8z_arfE236-qufOfr9wLLdSK8tz1ORcRrVrJyn-oLe_FYFsx6al1KdsCLL0HBarIDufY6oQEH5moaNrMRskmAKH9wNDd7_HX9cdhWg5L1hEI_n6XEQEq28xKZObmQ68_zy0ogLJy9rJ7Iv41iUuAXdTly9F2L8UYsuT9prd5RD9Gcj7F1uyFs24kSD6exnit0XRTe0vQSwZ--w1VFtU9dCY"/>
+</div>
+</div>
+</header>
+<!-- Main Content Canvas -->
+<main class="ml-64 pt-16 min-h-screen">
+<div class="p-8 space-y-8">
+<!-- KPI Cards Row -->
+<div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+<!-- KPI 1 -->
+<div class="bg-surface-container-lowest p-6 rounded-xl border-none transition-all hover:translate-y-[-2px]">
+<div class="flex justify-between items-start mb-4">
+<div class="w-10 h-10 rounded-lg bg-emerald-50 flex items-center justify-center text-emerald-600">
+<span class="material-symbols-outlined">payments</span>
+</div>
+<span class="text-[10px] font-bold text-emerald-600 bg-emerald-50 px-2 py-1 rounded-full uppercase tracking-tighter">+12.5%</span>
+</div>
+<p class="text-[10px] font-bold text-on-surface-variant/60 uppercase tracking-widest mb-1">Total Sales Today</p>
+<h2 class="text-2xl font-black text-on-surface tracking-tight">Rp 12.500.000</h2>
+</div>
+<!-- KPI 2 -->
+<div class="bg-surface-container-lowest p-6 rounded-xl border-none transition-all hover:translate-y-[-2px]">
+<div class="flex justify-between items-start mb-4">
+<div class="w-10 h-10 rounded-lg bg-emerald-50 flex items-center justify-center text-emerald-600">
+<span class="material-symbols-outlined">receipt_long</span>
+</div>
+<span class="text-[10px] font-bold text-slate-500 bg-slate-50 px-2 py-1 rounded-full uppercase tracking-tighter">Avg. 40/day</span>
+</div>
+<p class="text-[10px] font-bold text-on-surface-variant/60 uppercase tracking-widest mb-1">Transactions</p>
+<h2 class="text-2xl font-black text-on-surface tracking-tight">45</h2>
+</div>
+<!-- KPI 3 -->
+<div class="bg-surface-container-lowest p-6 rounded-xl border-none transition-all hover:translate-y-[-2px]">
+<div class="flex justify-between items-start mb-4">
+<div class="w-10 h-10 rounded-lg bg-red-50 flex items-center justify-center text-error">
+<span class="material-symbols-outlined">inventory</span>
+</div>
+<span class="text-[10px] font-bold text-error bg-red-50 px-2 py-1 rounded-full uppercase tracking-tighter">Action Needed</span>
+</div>
+<p class="text-[10px] font-bold text-on-surface-variant/60 uppercase tracking-widest mb-1">Stock Low</p>
+<h2 class="text-2xl font-black text-on-surface tracking-tight">8 <span class="text-sm font-normal text-slate-400">items</span></h2>
+</div>
+<!-- KPI 4 -->
+<div class="bg-surface-container-lowest p-6 rounded-xl border-none transition-all hover:translate-y-[-2px]">
+<div class="flex justify-between items-start mb-4">
+<div class="w-10 h-10 rounded-lg bg-emerald-50 flex items-center justify-center text-emerald-600">
+<span class="material-symbols-outlined">person_pin_circle</span>
+</div>
+<span class="flex h-2 w-2 relative">
+<span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
+<span class="relative inline-flex rounded-full h-2 w-2 bg-emerald-500"></span>
+</span>
+</div>
+<p class="text-[10px] font-bold text-on-surface-variant/60 uppercase tracking-widest mb-1">Active Cashier</p>
+<h2 class="text-2xl font-black text-on-surface tracking-tight">2 <span class="text-sm font-normal text-slate-400">Online</span></h2>
+</div>
+</div>
+<!-- Dashboard Bento Grid -->
+<div class="grid grid-cols-12 gap-6">
+<!-- Left Content: Sales Chart & Table -->
+<div class="col-span-12 lg:col-span-8 space-y-6">
+<!-- Sales Analytics representation -->
+<div class="bg-surface-container-lowest rounded-2xl p-8 relative overflow-hidden">
+<div class="flex justify-between items-end mb-12">
+<div>
+<h3 class="text-xl font-black tracking-tight text-on-surface">Daily Sales Performance</h3>
+<p class="text-sm text-on-surface-variant">Revenue trend over the last 24 hours</p>
+</div>
+<div class="flex gap-2">
+<button class="px-4 py-1.5 rounded-full bg-emerald-50 text-emerald-700 text-xs font-bold">Hourly</button>
+<button class="px-4 py-1.5 rounded-full text-slate-500 text-xs font-bold hover:bg-slate-50">Weekly</button>
+</div>
+</div>
+<!-- Simple visual chart representation using Tailwind -->
+<div class="relative h-64 w-full flex items-end justify-between gap-2 px-2">
+<div class="absolute inset-0 flex flex-col justify-between pointer-events-none opacity-20">
+<div class="border-t border-slate-300 w-full"></div>
+<div class="border-t border-slate-300 w-full"></div>
+<div class="border-t border-slate-300 w-full"></div>
+<div class="border-t border-slate-300 w-full"></div>
+<div class="border-t border-slate-300 w-full"></div>
+</div>
+<!-- Bars representing chart -->
+<div class="w-full bg-emerald-50 rounded-t-lg h-[40%] hover:bg-emerald-200 transition-colors"></div>
+<div class="w-full bg-emerald-100 rounded-t-lg h-[55%] hover:bg-emerald-200 transition-colors"></div>
+<div class="w-full bg-emerald-200 rounded-t-lg h-[45%] hover:bg-emerald-300 transition-colors"></div>
+<div class="w-full bg-emerald-400 rounded-t-lg h-[70%] hover:bg-emerald-500 transition-colors"></div>
+<div class="w-full bg-primary-container rounded-t-lg h-[85%] hover:bg-emerald-600 transition-colors"></div>
+<div class="w-full bg-emerald-300 rounded-t-lg h-[60%] hover:bg-emerald-400 transition-colors"></div>
+<div class="w-full bg-emerald-100 rounded-t-lg h-[35%] hover:bg-emerald-200 transition-colors"></div>
+<div class="w-full bg-emerald-50 rounded-t-lg h-[50%] hover:bg-emerald-200 transition-colors"></div>
+<div class="w-full bg-emerald-200 rounded-t-lg h-[65%] hover:bg-emerald-300 transition-colors"></div>
+<div class="w-full bg-emerald-400 rounded-t-lg h-[95%] hover:bg-emerald-500 transition-colors"></div>
+<div class="w-full bg-primary rounded-t-lg h-[80%] hover:bg-primary-container transition-colors"></div>
+<div class="w-full bg-emerald-300 rounded-t-lg h-[55%] hover:bg-emerald-400 transition-colors"></div>
+</div>
+</div>
+<!-- Recent Transactions Table -->
+<div class="bg-surface-container-lowest rounded-2xl overflow-hidden">
+<div class="p-8 border-b border-slate-50 flex items-center justify-between">
+<h3 class="text-xl font-black tracking-tight text-on-surface">Recent Transactions</h3>
+<button class="text-primary text-xs font-bold hover:underline">View All Activity</button>
+</div>
+<div class="overflow-x-auto">
+<table class="w-full text-left">
+<thead class="bg-surface-container-low text-[10px] font-bold text-on-surface-variant/60 uppercase tracking-widest">
+<tr>
+<th class="px-8 py-4">Order ID</th>
+<th class="px-6 py-4">Date</th>
+<th class="px-6 py-4">Customer</th>
+<th class="px-6 py-4 text-right">Total (IDR)</th>
+<th class="px-8 py-4 text-center">Status</th>
+</tr>
+</thead>
+<tbody class="divide-y divide-slate-50 text-sm font-medium">
+<tr class="hover:bg-slate-50 transition-colors group">
+<td class="px-8 py-5 text-on-surface">#ORD-2023-8901</td>
+<td class="px-6 py-5 text-slate-500">Oct 24, 14:32</td>
+<td class="px-6 py-5 text-on-surface">Walking Customer</td>
+<td class="px-6 py-5 text-right font-bold tabular-nums">Rp 450.000</td>
+<td class="px-8 py-5 text-center">
+<span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-emerald-50 text-emerald-700 text-[10px] font-bold uppercase">
+<span class="w-1.5 h-1.5 rounded-full bg-emerald-600"></span> Success
+                                            </span>
+</td>
+</tr>
+<tr class="hover:bg-slate-50 transition-colors group">
+<td class="px-8 py-5 text-on-surface">#ORD-2023-8900</td>
+<td class="px-6 py-5 text-slate-500">Oct 24, 14:15</td>
+<td class="px-6 py-5 text-on-surface">Dian Sastrowardoyo</td>
+<td class="px-6 py-5 text-right font-bold tabular-nums">Rp 1.250.000</td>
+<td class="px-8 py-5 text-center">
+<span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-yellow-50 text-yellow-700 text-[10px] font-bold uppercase">
+<span class="w-1.5 h-1.5 rounded-full bg-yellow-600"></span> Pending
+                                            </span>
+</td>
+</tr>
+<tr class="hover:bg-slate-50 transition-colors group">
+<td class="px-8 py-5 text-on-surface">#ORD-2023-8899</td>
+<td class="px-6 py-5 text-slate-500">Oct 24, 13:45</td>
+<td class="px-6 py-5 text-on-surface">Ahmad Dhani</td>
+<td class="px-6 py-5 text-right font-bold tabular-nums">Rp 275.000</td>
+<td class="px-8 py-5 text-center">
+<span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-emerald-50 text-emerald-700 text-[10px] font-bold uppercase">
+<span class="w-1.5 h-1.5 rounded-full bg-emerald-600"></span> Success
+                                            </span>
+</td>
+</tr>
+<tr class="hover:bg-slate-50 transition-colors group">
+<td class="px-8 py-5 text-on-surface">#ORD-2023-8898</td>
+<td class="px-6 py-5 text-slate-500">Oct 24, 13:20</td>
+<td class="px-6 py-5 text-on-surface">Walking Customer</td>
+<td class="px-6 py-5 text-right font-bold tabular-nums">Rp 89.000</td>
+<td class="px-8 py-5 text-center">
+<span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-emerald-50 text-emerald-700 text-[10px] font-bold uppercase">
+<span class="w-1.5 h-1.5 rounded-full bg-emerald-600"></span> Success
+                                            </span>
+</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+</div>
+<!-- Right Sidebar Content: Top Selling -->
+<div class="col-span-12 lg:col-span-4 space-y-6">
+<div class="bg-surface-container-lowest rounded-2xl p-8 sticky top-24">
+<div class="flex items-center justify-between mb-8">
+<h3 class="text-xl font-black tracking-tight text-on-surface">Top Selling</h3>
+<span class="material-symbols-outlined text-slate-400">trending_up</span>
+</div>
+<div class="space-y-6">
+<!-- Product 1 -->
+<div class="flex items-center gap-4 group cursor-pointer">
+<div class="w-14 h-14 rounded-xl overflow-hidden flex-shrink-0">
+<img alt="Running Shoes" class="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500" data-alt="High-performance crimson red running shoe with white sole on a clean minimalist light grey background" src="https://lh3.googleusercontent.com/aida-public/AB6AXuD5vmWrrG-nc0MjmfrtYPI5UvoT5XpGTJ8VJ4kb-pxDe5bOrEc5OpwodBbstieCdHkQyziqD-UBtiEe0JwYAJocVlKaokiubfuG0Iw7Bi0gxRHlG99v3Wzdlt9ZGLuK7a2wTDMf2pHr04R4rlBGeM-w1ERM7Oh2QpYm8gAFAQkvNiY-edrK2s3p80-NOzi09Z9sXTh6YNCsi3idZRz0h13jpZYNlBPWlsDXvmYemgTN6XcC-M07SY8YAV4k6kpupPDQ44QrG2oGDQc"/>
+</div>
+<div class="flex-1">
+<h4 class="text-sm font-bold text-on-surface leading-tight group-hover:text-primary transition-colors">UltraBoost Performance Red</h4>
+<p class="text-[10px] font-bold text-on-surface-variant/60 uppercase tracking-widest mt-0.5">85 Units Sold</p>
+</div>
+<div class="text-right">
+<p class="text-sm font-black text-on-surface">Rp 2.1M</p>
+<p class="text-[10px] text-emerald-600 font-bold">+15%</p>
+</div>
+</div>
+<!-- Product 2 -->
+<div class="flex items-center gap-4 group cursor-pointer">
+<div class="w-14 h-14 rounded-xl overflow-hidden flex-shrink-0">
+<img alt="Organic Coffee" class="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500" data-alt="Bag of dark roasted specialty coffee beans with matte finish and minimalist typography labels" src="https://lh3.googleusercontent.com/aida-public/AB6AXuAnCxLAgmisuAaTI0scTIgxFfaJsDm7GGNuny7rBV1cWWc1MdkX6mlYWr9yLoGb4Mgj7r7T82lMjHmglqn1vcjHG4D69epcCMjQOEDaT95Y6fQ8efE0GZgCZ0ZTKiE-VKWz6P1ChI_XHiAv12Sd76DaVmVGzD1TApheBAIYeyJEc1rwS80TkEOZfRxp1YD2697ARmgrfFm8pxDSGVD5DhakhB4z1Jw8VW00jvJCILYcKguz6L6Qc_qVzSYcKHhqlqXcWkskg8IHXm0"/>
+</div>
+<div class="flex-1">
+<h4 class="text-sm font-bold text-on-surface leading-tight group-hover:text-primary transition-colors">Aceh Gayo Dark Roast 500g</h4>
+<p class="text-[10px] font-bold text-on-surface-variant/60 uppercase tracking-widest mt-0.5">142 Units Sold</p>
+</div>
+<div class="text-right">
+<p class="text-sm font-black text-on-surface">Rp 1.4M</p>
+<p class="text-[10px] text-emerald-600 font-bold">+8%</p>
+</div>
+</div>
+<!-- Product 3 -->
+<div class="flex items-center gap-4 group cursor-pointer">
+<div class="w-14 h-14 rounded-xl overflow-hidden flex-shrink-0">
+<img alt="Smart Watch" class="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500" data-alt="Modern silver smartwatch with white band reflecting clean studio lighting on a white surface" src="https://lh3.googleusercontent.com/aida-public/AB6AXuAlZOIgdBYerBUpgskE8uGtoNOCg_Qww_bCeDSvhPHurW4f12L6RPQguUGDgv-0OulRDXNG76gJ7tMehlqVHjEfyKBwD8S86sHmxLsuvK1HIbiNPr8ltJ_5ulZxBRQ1TN3zP6nlvL52gtphMaP1bOnZAU7cRxq1Og_wUIfB41mFCapa3cwImuMpdYd99AbsDwoCOLDWXpHJ__zJD6MN8CDwJd39odJKcAH53nYABbig8lgj3G3oCQkwbJhXiTvCo_fV-QuY0GdGgUs"/>
+</div>
+<div class="flex-1">
+<h4 class="text-sm font-bold text-on-surface leading-tight group-hover:text-primary transition-colors">Quantum Smartwatch v2</h4>
+<p class="text-[10px] font-bold text-on-surface-variant/60 uppercase tracking-widest mt-0.5">34 Units Sold</p>
+</div>
+<div class="text-right">
+<p class="text-sm font-black text-on-surface">Rp 5.6M</p>
+<p class="text-[10px] text-slate-400 font-bold">-2%</p>
+</div>
+</div>
+<!-- Product 4 -->
+<div class="flex items-center gap-4 group cursor-pointer">
+<div class="w-14 h-14 rounded-xl overflow-hidden flex-shrink-0">
+<img alt="Green Hoodie" class="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500" data-alt="High-quality forest green cotton hoodie folded neatly on a textured wooden background" src="https://lh3.googleusercontent.com/aida-public/AB6AXuBZNq8PZEXqW4dMkM79oTsCZQ3kLK3a94SEkZhflS9T6-voRB0aNF6ThoKDQwpn-h_9_nb9RNPST1BL29HI1-05TZaKMXWyWdU-ki5KQt17EYAQ-ZirJVNNFiiH4oEi6CDQcourPpn1Ni4X7OYyi_uL3nXIootJNCIViC7s5O1uXeG9TbBNWNbRu7nAySN5hmlTSqBpX_Y69hR2AdvUzRH8r3wBWjtT0R1Utf2TReuHg8ItNmGn4gMdKx2-bBgsae3wLLdC7H4Z-_A"/>
+</div>
+<div class="flex-1">
+<h4 class="text-sm font-bold text-on-surface leading-tight group-hover:text-primary transition-colors">Essential Oversized Hoodie</h4>
+<p class="text-[10px] font-bold text-on-surface-variant/60 uppercase tracking-widest mt-0.5">210 Units Sold</p>
+</div>
+<div class="text-right">
+<p class="text-sm font-black text-on-surface">Rp 3.1M</p>
+<p class="text-[10px] text-emerald-600 font-bold">+22%</p>
+</div>
+</div>
+</div>
+<div class="mt-12 bg-surface-container-low rounded-xl p-5 border border-primary/10">
+<h4 class="text-xs font-black text-primary uppercase tracking-widest mb-2">Inventory Insight</h4>
+<p class="text-xs text-on-surface-variant leading-relaxed">Your stock turnover is 14% higher than last month. Consider restocking <b>UltraBoost Red</b> within 48 hours.</p>
+<button class="mt-4 w-full py-2 bg-white text-primary text-[10px] font-bold uppercase rounded-lg border border-primary/20 hover:bg-emerald-50 transition-colors">Optimize Stock</button>
+</div>
+</div>
+</div>
+</div>
+</div>
+</main>
+</body></html>

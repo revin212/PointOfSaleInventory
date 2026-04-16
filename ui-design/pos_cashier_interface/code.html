@@ -1,0 +1,394 @@
+<!DOCTYPE html>
+
+<html class="light" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Precision Ledger - High-Performance POS</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<style>
+        body { font-family: 'Inter', sans-serif; -webkit-font-smoothing: antialiased; }
+        .material-symbols-outlined { font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24; }
+        .glass-panel { background: rgba(255, 255, 255, 0.8); backdrop-filter: blur(12px); }
+        .custom-scrollbar::-webkit-scrollbar { width: 4px; }
+        .custom-scrollbar::-webkit-scrollbar-track { background: transparent; }
+        .custom-scrollbar::-webkit-scrollbar-thumb { background: #bbcabf; border-radius: 10px; }
+        .tabular-nums { font-variant-numeric: tabular-nums; }
+    </style>
+<script id="tailwind-config">
+      tailwind.config = {
+        darkMode: "class",
+        theme: {
+          extend: {
+            "colors": {
+                    "surface-container": "#e5eeff",
+                    "primary": "#006c49",
+                    "on-secondary": "#ffffff",
+                    "on-tertiary-fixed-variant": "#842225",
+                    "outline": "#6c7a71",
+                    "on-primary-container": "#00422b",
+                    "on-surface": "#0b1c30",
+                    "inverse-on-surface": "#eaf1ff",
+                    "on-tertiary-fixed": "#410005",
+                    "on-error-container": "#93000a",
+                    "on-primary": "#ffffff",
+                    "tertiary-fixed": "#ffdad7",
+                    "on-error": "#ffffff",
+                    "primary-fixed": "#6ffbbe",
+                    "on-primary-fixed-variant": "#005236",
+                    "surface-container-lowest": "#ffffff",
+                    "surface-container-high": "#dce9ff",
+                    "on-tertiary-container": "#711419",
+                    "on-secondary-container": "#3c6c54",
+                    "primary-container": "#10b981",
+                    "on-tertiary": "#ffffff",
+                    "secondary": "#376850",
+                    "surface-dim": "#cbdbf5",
+                    "on-surface-variant": "#3c4a42",
+                    "error-container": "#ffdad6",
+                    "on-secondary-fixed": "#002113",
+                    "secondary-container": "#b7ebce",
+                    "surface": "#f8f9ff",
+                    "on-background": "#0b1c30",
+                    "on-primary-fixed": "#002113",
+                    "secondary-fixed": "#baeed1",
+                    "inverse-primary": "#4edea3",
+                    "tertiary-container": "#fc7c78",
+                    "secondary-fixed-dim": "#9ed2b5",
+                    "outline-variant": "#bbcabf",
+                    "primary-fixed-dim": "#4edea3",
+                    "error": "#ba1a1a",
+                    "surface-container-highest": "#d3e4fe",
+                    "surface-tint": "#006c49",
+                    "surface-container-low": "#eff4ff",
+                    "surface-variant": "#d3e4fe",
+                    "tertiary": "#a43a3a",
+                    "tertiary-fixed-dim": "#ffb3af",
+                    "inverse-surface": "#213145",
+                    "on-secondary-fixed-variant": "#1e4f3a",
+                    "background": "#f8f9ff",
+                    "surface-bright": "#f8f9ff"
+            },
+            "borderRadius": {
+                    "DEFAULT": "0.125rem",
+                    "lg": "0.25rem",
+                    "xl": "0.5rem",
+                    "full": "0.75rem"
+            },
+            "fontFamily": {
+                    "headline": ["Inter"],
+                    "body": ["Inter"],
+                    "label": ["Inter"]
+            }
+          },
+        },
+      }
+    </script>
+</head>
+<body class="bg-surface text-on-surface font-sans antialiased overflow-hidden h-screen flex">
+<!-- SIDE NAVIGATION (From Shared Components JSON) -->
+<aside class="hidden md:flex flex-col h-screen py-6 px-4 bg-slate-50 dark:bg-slate-950 h-full w-64 fixed left-0 top-0 border-r-0 font-sans Inter antialiased">
+<div class="mb-8 px-4">
+<h1 class="text-lg font-bold tracking-tight text-emerald-700 dark:text-emerald-400">Precision Ledger</h1>
+<p class="text-xs text-on-surface-variant opacity-70">Smart POS System</p>
+</div>
+<nav class="flex-1 space-y-1">
+<a class="flex items-center gap-3 px-4 py-2 text-slate-600 dark:text-slate-400 hover:text-emerald-600 dark:hover:text-emerald-300 hover:bg-emerald-50 dark:hover:bg-emerald-900/30 transition-colors" href="#">
+<span class="material-symbols-outlined" data-icon="dashboard">dashboard</span>
+<span class="text-sm font-medium">Dashboard</span>
+</a>
+<a class="flex items-center gap-3 px-4 py-2 text-emerald-700 dark:text-emerald-400 bg-emerald-50 dark:bg-emerald-950/50 rounded-lg font-semibold" href="#">
+<span class="material-symbols-outlined" data-icon="point_of_sale">point_of_sale</span>
+<span class="text-sm font-medium">POS</span>
+</a>
+<a class="flex items-center gap-3 px-4 py-2 text-slate-600 dark:text-slate-400 hover:text-emerald-600 dark:hover:text-emerald-300 hover:bg-emerald-50 dark:hover:bg-emerald-900/30 transition-colors" href="#">
+<span class="material-symbols-outlined" data-icon="receipt_long">receipt_long</span>
+<span class="text-sm font-medium">Sales History</span>
+</a>
+<a class="flex items-center gap-3 px-4 py-2 text-slate-600 dark:text-slate-400 hover:text-emerald-600 dark:hover:text-emerald-300 hover:bg-emerald-50 dark:hover:bg-emerald-900/30 transition-colors" href="#">
+<span class="material-symbols-outlined" data-icon="inventory_2">inventory_2</span>
+<span class="text-sm font-medium">Products</span>
+</a>
+<a class="flex items-center gap-3 px-4 py-2 text-slate-600 dark:text-slate-400 hover:text-emerald-600 dark:hover:text-emerald-300 hover:bg-emerald-50 dark:hover:bg-emerald-900/30 transition-colors" href="#">
+<span class="material-symbols-outlined" data-icon="warehouse">warehouse</span>
+<span class="text-sm font-medium">Inventory</span>
+</a>
+<a class="flex items-center gap-3 px-4 py-2 text-slate-600 dark:text-slate-400 hover:text-emerald-600 dark:hover:text-emerald-300 hover:bg-emerald-50 dark:hover:bg-emerald-900/30 transition-colors" href="#">
+<span class="material-symbols-outlined" data-icon="analytics">analytics</span>
+<span class="text-sm font-medium">Reports</span>
+</a>
+</nav>
+<div class="mt-auto space-y-1">
+<a class="flex items-center gap-3 px-4 py-2 text-slate-600 dark:text-slate-400 hover:text-emerald-600 dark:hover:text-emerald-300 hover:bg-emerald-50 dark:hover:bg-emerald-900/30 transition-colors" href="#">
+<span class="material-symbols-outlined" data-icon="settings">settings</span>
+<span class="text-sm font-medium">Settings</span>
+</a>
+<a class="flex items-center gap-3 px-4 py-2 text-slate-600 dark:text-slate-400 hover:text-emerald-600 dark:hover:text-emerald-300 hover:bg-emerald-50 dark:hover:bg-emerald-900/30 transition-colors" href="#">
+<span class="material-symbols-outlined" data-icon="help_outline">help_outline</span>
+<span class="text-sm font-medium">Support</span>
+</a>
+</div>
+</aside>
+<!-- MAIN CONTENT AREA -->
+<main class="flex-1 ml-0 md:ml-64 flex flex-col h-screen overflow-hidden">
+<!-- TOP NAVIGATION (From Shared Components JSON) -->
+<header class="flex items-center justify-between w-full h-16 px-8 bg-white/80 dark:bg-slate-950/80 backdrop-blur-md fixed top-0 right-0 z-40 border-b border-slate-200/50 dark:border-slate-800/50 md:w-[calc(100%-16rem)] ml-64 shadow-sm dark:shadow-none font-sans Inter tracking-tight">
+<div class="flex items-center flex-1 gap-6">
+<div class="relative w-full max-w-md group">
+<span class="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-outline group-focus-within:text-primary transition-colors" data-icon="search">search</span>
+<input class="w-full bg-surface-container-low border-none rounded-xl py-2 pl-10 pr-12 focus:ring-2 focus:ring-primary/20 text-sm placeholder:text-outline-variant" placeholder="Search products or scan barcode..." type="text"/>
+<button class="absolute right-2 top-1/2 -translate-y-1/2 p-1.5 text-primary hover:bg-primary/10 rounded-lg transition-colors">
+<span class="material-symbols-outlined text-lg" data-icon="barcode_scanner">barcode_scanner</span>
+</button>
+</div>
+</div>
+<div class="flex items-center gap-4">
+<button class="p-2 text-on-surface-variant hover:bg-surface-container transition-colors rounded-full">
+<span class="material-symbols-outlined" data-icon="notifications">notifications</span>
+</button>
+<button class="p-2 text-on-surface-variant hover:bg-surface-container transition-colors rounded-full">
+<span class="material-symbols-outlined" data-icon="history">history</span>
+</button>
+<div class="h-8 w-8 rounded-full overflow-hidden border-2 border-primary-container">
+<img class="h-full w-full object-cover" data-alt="portrait of a shop owner wearing a professional apron in a bright modern cafe setting" src="https://lh3.googleusercontent.com/aida-public/AB6AXuDdyaLBiGo0AM3QzqcXvroZZygbvG81tnBtzOgazUKdf4ZSyF1iJA1ndWFljQ1HfL6k4ztz62wuMQ7JwPm2P1bHxeX6mYohUXJPKXCiU7tog9WHZ6Xytujzb5CKpNVC9w-U68pEE2oS7t2MXaxFTur3taKjO-6U1g6nXIPdb2ylqsLym8zu397UTDLskB7iYSUwyxHwUaGZ-Ln2BDyV7K4mk6UU5zoaE4tKK2JE6tdlGNjNmSIj6Yi_feemm-jjSRuOSHux7sT0trs"/>
+</div>
+</div>
+</header>
+<!-- PRODUCT SECTION -->
+<section class="flex flex-1 mt-16 overflow-hidden">
+<div class="flex-1 flex flex-col p-6 overflow-hidden">
+<!-- CATEGORY TABS -->
+<div class="flex items-center gap-2 mb-6 overflow-x-auto pb-2 scrollbar-hide">
+<button class="px-6 py-2 rounded-full bg-primary text-on-primary font-semibold text-sm shadow-md transition-all active:scale-95">All Items</button>
+<button class="px-6 py-2 rounded-full bg-surface-container-low text-on-surface-variant font-medium text-sm hover:bg-surface-container transition-all active:scale-95">Foods</button>
+<button class="px-6 py-2 rounded-full bg-surface-container-low text-on-surface-variant font-medium text-sm hover:bg-surface-container transition-all active:scale-95">Drinks</button>
+<button class="px-6 py-2 rounded-full bg-surface-container-low text-on-surface-variant font-medium text-sm hover:bg-surface-container transition-all active:scale-95">Snacks</button>
+<button class="px-6 py-2 rounded-full bg-surface-container-low text-on-surface-variant font-medium text-sm hover:bg-surface-container transition-all active:scale-95">Desserts</button>
+</div>
+<!-- BENTO PRODUCT GRID -->
+<div class="flex-1 overflow-y-auto pr-2 custom-scrollbar grid grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
+<!-- Product Card 1 -->
+<button class="group relative flex flex-col bg-surface-container-lowest rounded-xl text-left transition-all hover:ring-2 hover:ring-primary/20 active:scale-[0.98] p-1">
+<div class="aspect-square rounded-lg overflow-hidden bg-surface-container-low relative mb-1">
+<img class="h-full w-full object-cover group-hover:scale-105 transition-transform duration-500" data-alt="premium wagyu beef burger with melting cheese and fresh greens on a brioche bun studio lighting" src="https://lh3.googleusercontent.com/aida-public/AB6AXuDDu9ufznohXsISOdARFRGv04Y9glaQRHTcGaj_KKDuAkPBRqjPC9dnLj1DUWr3m4cYczIOxVUl7WH4Rl4t3HmJ99Yi9S6CtSQcnc_TNns8QTxVaWcJBw-vs36J7Ovw21K-VHF4VFtD5HchLXy_jZKCxbUFJ4njVjQ1llaWslYvUGBOVPgTaDYUWMsOT4hdGZ7NPp7l3OfcZBzfJl-chcwEiFkKp0SCFUBNp-w0QHLbz1vU_ajgMnw-Eq1phefaiaGLEWqw7iQusV0"/>
+<div class="absolute top-2 right-2 px-2 py-1 bg-white/90 backdrop-blur rounded-md shadow-sm">
+<p class="text-[10px] font-bold text-primary flex items-center gap-1">
+<span class="w-1.5 h-1.5 rounded-full bg-primary"></span> 42 In Stock
+                                </p>
+</div>
+</div>
+<h3 class="font-bold text-on-surface text-sm line-clamp-1">Wagyu Signature Burger</h3>
+<p class="text-primary font-black tabular-nums mt-0.5">Rp 85.000</p>
+</button>
+<!-- Product Card 2 -->
+<button class="group relative flex flex-col bg-surface-container-lowest rounded-xl text-left transition-all hover:ring-2 hover:ring-primary/20 active:scale-[0.98] p-1">
+<div class="aspect-square rounded-lg overflow-hidden bg-surface-container-low relative mb-1">
+<img class="h-full w-full object-cover group-hover:scale-105 transition-transform duration-500" data-alt="creamy artisan iced coffee with layers of milk and espresso in a tall glass with condensation" src="https://lh3.googleusercontent.com/aida-public/AB6AXuBxUqeKXkQDgeCB0wDfH6cyn4XFZmq3S7uhcZ3gpOiCJudbORsziQy4tVK3ZpzFShMcaW-M9rm19o2rLfVJM_2A4qm9NpE5bDObTV3OIjk7kSwcgp93aM0MSR54iEVBSAE1PDNManWgpaz_JPgES4x9u55frKn2btiRww1WnTgCS4mwr-KulgEhlvHgYR03UN_1_SGWNKpiSYD8LVDyrZ04HWwYE4sKQSYx4BSKysrr00ZrQXPXpqkbPXVJrZmQTMmXnGjHMuv7f30"/>
+<div class="absolute top-2 right-2 px-2 py-1 bg-white/90 backdrop-blur rounded-md shadow-sm">
+<p class="text-[10px] font-bold text-primary flex items-center gap-1">
+<span class="w-1.5 h-1.5 rounded-full bg-primary"></span> 128 In Stock
+                                </p>
+</div>
+</div>
+<h3 class="font-bold text-on-surface text-sm line-clamp-1">Iced Caramel Macchiato</h3>
+<p class="text-primary font-black tabular-nums mt-0.5">Rp 42.000</p>
+</button>
+<!-- Product Card 3 -->
+<button class="group relative flex flex-col bg-surface-container-lowest rounded-xl text-left transition-all hover:ring-2 hover:ring-primary/20 active:scale-[0.98] p-1">
+<div class="aspect-square rounded-lg overflow-hidden bg-surface-container-low relative mb-1">
+<img class="h-full w-full object-cover group-hover:scale-105 transition-transform duration-500" data-alt="fresh oven baked pepperoni pizza with bubbling mozzarella and basil leaves top view" src="https://lh3.googleusercontent.com/aida-public/AB6AXuDH_erRDytd3Z4x6HMnR4KWl7g1P7Hs6coFeo4ItlSDrfRRar7O-CB4Ey1JVgW-Kr75emuiBIg7U007LLRl-Oyymj-wVql26K8oyrqPXY4tQJgV1Ta8e8r--EXh0hbJwP-_8fX7RGLPAmNk-b33a6XOmevO-b9DiB7fCQoAhQomzTqj3hDVEuneY2w30fnRQnKbsywEIje9FSw5zrTGLk7BAo8OLMXKT55FWEmXcnXPN9RpsZiJyQxOi5R_gzdNuGk0bXoyWu8MEpA"/>
+<div class="absolute top-2 right-2 px-2 py-1 bg-white/90 backdrop-blur rounded-md shadow-sm">
+<p class="text-[10px] font-bold text-primary flex items-center gap-1">
+<span class="w-1.5 h-1.5 rounded-full bg-primary"></span> 15 In Stock
+                                </p>
+</div>
+</div>
+<h3 class="font-bold text-on-surface text-sm line-clamp-1">Classic Pepperoni Pizza</h3>
+<p class="text-primary font-black tabular-nums mt-0.5">Rp 120.000</p>
+</button>
+<!-- Product Card 4 -->
+<button class="group relative flex flex-col bg-surface-container-lowest rounded-xl text-left transition-all hover:ring-2 hover:ring-primary/20 active:scale-[0.98] p-1">
+<div class="aspect-square rounded-lg overflow-hidden bg-surface-container-low relative mb-1">
+<img class="h-full w-full object-cover group-hover:scale-105 transition-transform duration-500" data-alt="chocolate glazed doughnut with colorful sprinkles on a minimalist turquoise background" src="https://lh3.googleusercontent.com/aida-public/AB6AXuBQLXHsuHN-Z55PuF_9qMPlPWTx26LIdqb6KV6iptbAeAd3KZEB7LCFT171RSRti3alrIejoFSnQ4x3ne2gW4bi1RZCv34KUFvNRsJxDrxk_D_ALtAbI4TLLwG60fwBztPbNwqMxdXbhuDLsMFj5-P_Px_P-e7uLzXlETNII2ebaAnq6awvDsrvIqBzhCFB6dHP13KBWNAjetTc0ogGsL9zXfmAvlF3BPT3VwEF52ZSTNM0-kThS77rq_Mjf6LE_gwsZzRUl66m4Yc"/>
+<div class="absolute top-2 right-2 px-2 py-1 bg-white/90 backdrop-blur rounded-md shadow-sm">
+<p class="text-[10px] font-bold text-primary flex items-center gap-1">
+<span class="w-1.5 h-1.5 rounded-full bg-primary"></span> 64 In Stock
+                                </p>
+</div>
+</div>
+<h3 class="font-bold text-on-surface text-sm line-clamp-1">Double Choco Donut</h3>
+<p class="text-primary font-black tabular-nums mt-0.5">Rp 18.000</p>
+</button>
+<!-- Product Card 5 -->
+<button class="group relative flex flex-col bg-surface-container-lowest rounded-xl text-left transition-all hover:ring-2 hover:ring-primary/20 active:scale-[0.98] p-1">
+<div class="aspect-square rounded-lg overflow-hidden bg-surface-container-low relative mb-1">
+<img class="h-full w-full object-cover group-hover:scale-105 transition-transform duration-500" data-alt="vibrant healthy salad bowl with avocado salmon quinoa and citrus dressing bright aesthetic" src="https://lh3.googleusercontent.com/aida-public/AB6AXuArLF4V9TiXB41-woWmQ_-TMZDCgaORQWpsYiSRw0JlOxCCN7xU1d9ukJoJt0_DRPzjqvJjRMrSZPR9Z0J6NvxSqdAXhHxfXAytE5nhMIWQVilk9_0H8es5Vi2hg1y5vHWiTVJur6CXvREayno97qpfxvn71mVkngo-J7gC2NDZSMa107KxS9R7Sm0nsaJGr3wXWeZQxJBQ4ZAJkuDcQZd1PgzoW-q_rwT4LYx0mngRnC018rV8B11SE5XI0A07XrJ82JVObjgqrdI"/>
+<div class="absolute top-2 right-2 px-2 py-1 bg-white/90 backdrop-blur rounded-md shadow-sm">
+<p class="text-[10px] font-bold text-primary flex items-center gap-1">
+<span class="w-1.5 h-1.5 rounded-full bg-primary"></span> 22 In Stock
+                                </p>
+</div>
+</div>
+<h3 class="font-bold text-on-surface text-sm line-clamp-1">Salmon Avocado Bowl</h3>
+<p class="text-primary font-black tabular-nums mt-0.5">Rp 95.000</p>
+</button>
+<!-- Product Card 6 -->
+<button class="group relative flex flex-col bg-surface-container-lowest rounded-xl text-left transition-all hover:ring-2 hover:ring-primary/20 active:scale-[0.98] p-1">
+<div class="aspect-square rounded-lg overflow-hidden bg-surface-container-low relative mb-1">
+<img class="h-full w-full object-cover group-hover:scale-105 transition-transform duration-500" data-alt="crispy golden french fries in a paper cone with a small side of truffle mayo" src="https://lh3.googleusercontent.com/aida-public/AB6AXuDg5OwJAA7pUjhB2uztLTsy6aBvFRJLegNoR3I5yUR7qiNvrq0v7LGll91O9Um7xetyHHwJZ-5G8iX8yHDsdMK4SidQ9Qv77xzZ85W85X5UIQ46_kfimU8D22cVzQ_OaehlXMmCObZNg9YD34ULCNinD6YkXKCfop-1j7pnwr7dx7Yzd0frUaI0UJHOtHanddFEPkZLPmhypsgTHNCSccbkUIUcUswkMtKZG5IFVpbg7-kTINp5k0Jelv8J2emP-63HlmF6iBapo60"/>
+<div class="absolute top-2 right-2 px-2 py-1 bg-white/90 backdrop-blur rounded-md shadow-sm">
+<p class="text-[10px] font-bold text-primary flex items-center gap-1">
+<span class="w-1.5 h-1.5 rounded-full bg-primary"></span> 89 In Stock
+                                </p>
+</div>
+</div>
+<h3 class="font-bold text-on-surface text-sm line-clamp-1">Truffle Parm Fries</h3>
+<p class="text-primary font-black tabular-nums mt-0.5">Rp 35.000</p>
+</button>
+<!-- Product Card 7 -->
+<button class="group relative flex flex-col bg-surface-container-lowest rounded-xl text-left transition-all hover:ring-2 hover:ring-primary/20 active:scale-[0.98] p-1">
+<div class="aspect-square rounded-lg overflow-hidden bg-surface-container-low relative mb-1">
+<img class="h-full w-full object-cover group-hover:scale-105 transition-transform duration-500" data-alt="steaming green matcha latte with delicate leaf art in a ceramic cup minimalist wood table" src="https://lh3.googleusercontent.com/aida-public/AB6AXuCNliJy_HwPuFNZDf8C6IDJKSQkKCe9Mpr6-EDh-NR1JxuHkhniTrgAUk_snbYsAXu8XZSGvb5C9J2G2OkNoIGpm2L1Pm-HD-jrnwojc5HE1FuRedFsopDsVJP-aDEBaqidoEFLbojOYBJnP5H3UmuSMbYurWCOjvCWMEmpZBKvvmAwKEercPvWBjH16HuHcxx7eLIHVePQAbR2ZoGjZ098ThgDPKHadhZluMGxBM6FMgGaJqOAMfEUhQHTe1oyAzCzFZ7A2oKF9lE"/>
+<div class="absolute top-2 right-2 px-2 py-1 bg-white/90 backdrop-blur rounded-md shadow-sm">
+<p class="text-[10px] font-bold text-primary flex items-center gap-1">
+<span class="w-1.5 h-1.5 rounded-full bg-primary"></span> 54 In Stock
+                                </p>
+</div>
+</div>
+<h3 class="font-bold text-on-surface text-sm line-clamp-1">Ceremonial Matcha Latte</h3>
+<p class="text-primary font-black tabular-nums mt-0.5">Rp 48.000</p>
+</button>
+<!-- Product Card 8 -->
+<button class="group relative flex flex-col bg-surface-container-lowest rounded-xl text-left transition-all hover:ring-2 hover:ring-primary/20 active:scale-[0.98] p-1">
+<div class="aspect-square rounded-lg overflow-hidden bg-surface-container-low relative mb-1">
+<img class="h-full w-full object-cover group-hover:scale-105 transition-transform duration-500" data-alt="refreshing strawberry lemonade with fresh fruit slices and mint garnish in a mason jar" src="https://lh3.googleusercontent.com/aida-public/AB6AXuBvYv0xSnsLWMkMP8k_IcWl3oFHQL9W11doccdfjXy-Z4xu_GPDmjtr-F17FRNXl3a1-tDCus9LVQfMgJ1_ItS2YFmlofAsj-iMkVorg4G2fTGEOtes0GiJp1OWM5cQkx3moEFJLYOXZKWkuB2ieBxAWi86BhoiRa82ossplrg2WjQfbkRYLHfR9f_5TXPQN5nObYZdJkVUWIHXMwi0mgXjfew7EWIE9kn6wqGjIRmQgMPf7GyDkq0Ft6TLv40icdkUZCZ4xgFEQCI"/>
+<div class="absolute top-2 right-2 px-2 py-1 bg-white/90 backdrop-blur rounded-md shadow-sm">
+<p class="text-[10px] font-bold text-primary flex items-center gap-1">
+<span class="w-1.5 h-1.5 rounded-full bg-primary"></span> 72 In Stock
+                                </p>
+</div>
+</div>
+<h3 class="font-bold text-on-surface text-sm line-clamp-1">Fresh Strawberry Lemonade</h3>
+<p class="text-primary font-black tabular-nums mt-0.5">Rp 38.000</p>
+</button>
+</div>
+</div>
+<!-- RIGHT SECTION: CURRENT ORDER CART -->
+<aside class="w-96 glass-panel border-l border-outline-variant/15 flex flex-col h-full shadow-2xl relative z-10">
+<div class="p-6 border-b border-outline-variant/15">
+<div class="flex items-center justify-between mb-2">
+<h2 class="text-xl font-black tracking-tight text-on-surface">Current Order</h2>
+<button class="text-error font-medium text-xs hover:bg-error/10 px-2 py-1 rounded transition-colors">Clear All</button>
+</div>
+<div class="flex items-center gap-2 text-on-surface-variant">
+<span class="material-symbols-outlined text-sm" data-icon="person">person</span>
+<span class="text-xs font-semibold">Guest Customer</span>
+<span class="ml-auto text-[10px] bg-surface-container-high px-2 py-0.5 rounded-full font-bold uppercase tracking-wider">Order #429</span>
+</div>
+</div>
+<!-- CART LIST -->
+<div class="flex-1 overflow-y-auto p-4 space-y-4 custom-scrollbar">
+<!-- Cart Item 1 -->
+<div class="flex gap-3 group animate-in fade-in slide-in-from-right-2 duration-300">
+<div class="h-16 w-16 rounded-xl overflow-hidden bg-surface-container">
+<img class="h-full w-full object-cover" data-alt="close up of burger patty" src="https://lh3.googleusercontent.com/aida-public/AB6AXuBuqbsapEZ5CbMwbyQAuu5NxqwNiS1iNZri72utrVwUTKSr-30n68XcEo8eBSxV4fMmEykvS33EEh0-VSfE0zMGMnmNtt2ypK7Trb4gN9Tt6Ijug1GgHAZgimkJ8vinznqbQ4WwoccazPk1UYagVwM6Djr-AWkEA7jqpYBTxG54nrT9EAuBvoRM56OA5fcY94CIM7NiNabWYCM_ZjlrnpA7FqsYczSfGvOlNnyuv0gLnqp1CXAT53yx7ILQBEaWd1-_I8a8OUgigYc"/>
+</div>
+<div class="flex-1">
+<div class="flex justify-between items-start">
+<h4 class="text-sm font-bold text-on-surface leading-tight">Wagyu Signature Burger</h4>
+<button class="text-outline-variant hover:text-error transition-colors">
+<span class="material-symbols-outlined text-lg" data-icon="delete">delete</span>
+</button>
+</div>
+<div class="flex items-center justify-between mt-2">
+<div class="flex items-center bg-surface-container-low rounded-lg p-1 gap-3">
+<button class="w-6 h-6 flex items-center justify-center rounded bg-white shadow-sm text-primary active:scale-90 transition-transform">
+<span class="material-symbols-outlined text-sm" data-icon="remove">remove</span>
+</button>
+<span class="text-sm font-black tabular-nums">2</span>
+<button class="w-6 h-6 flex items-center justify-center rounded bg-white shadow-sm text-primary active:scale-90 transition-transform">
+<span class="material-symbols-outlined text-sm" data-icon="add">add</span>
+</button>
+</div>
+<p class="text-sm font-bold text-on-surface tabular-nums">Rp 170.000</p>
+</div>
+</div>
+</div>
+<!-- Cart Item 2 -->
+<div class="flex gap-3 group">
+<div class="h-16 w-16 rounded-xl overflow-hidden bg-surface-container">
+<img class="h-full w-full object-cover" data-alt="coffee cup" src="https://lh3.googleusercontent.com/aida-public/AB6AXuDRrC1EhX7TI5561vNL4Oa8nxPdz3PoqPujhxm4tulpGc3uUD2WaJBcwNevbe960JuSYCg7we27O6E0hly-_zoFBVsh-Op1EAANZAcs5OCk5AvkTFYIjMa4HABgmTeVi1ySPcO-AgChYoBaG5kGDbylo1zjdx8afFxyDKOMBXuJs4WkdUWAvAdzpw8oHbfP0Mdc26Cij_bpKzwnu_aIbV7FacYxX1Ti1Jh-ZtTQwCTAd0OrCaFRX5cwNG92aQaeUzHCsNV7wFsFTrU"/>
+</div>
+<div class="flex-1">
+<div class="flex justify-between items-start">
+<h4 class="text-sm font-bold text-on-surface leading-tight">Iced Caramel Macchiato</h4>
+<button class="text-outline-variant hover:text-error transition-colors">
+<span class="material-symbols-outlined text-lg" data-icon="delete">delete</span>
+</button>
+</div>
+<div class="flex items-center justify-between mt-2">
+<div class="flex items-center bg-surface-container-low rounded-lg p-1 gap-3">
+<button class="w-6 h-6 flex items-center justify-center rounded bg-white shadow-sm text-primary active:scale-90 transition-transform">
+<span class="material-symbols-outlined text-sm" data-icon="remove">remove</span>
+</button>
+<span class="text-sm font-black tabular-nums">1</span>
+<button class="w-6 h-6 flex items-center justify-center rounded bg-white shadow-sm text-primary active:scale-90 transition-transform">
+<span class="material-symbols-outlined text-sm" data-icon="add">add</span>
+</button>
+</div>
+<p class="text-sm font-bold text-on-surface tabular-nums">Rp 42.000</p>
+</div>
+</div>
+</div>
+</div>
+<!-- CART FOOTER & TOTALS -->
+<div class="bg-surface-container-low p-6 space-y-4">
+<div class="space-y-2">
+<div class="flex justify-between text-xs font-semibold text-on-surface-variant">
+<span>Subtotal</span>
+<span class="tabular-nums">Rp 212.000</span>
+</div>
+<div class="flex justify-between items-center text-xs font-semibold text-on-surface-variant">
+<span>Tax (11%)</span>
+<span class="tabular-nums">Rp 23.320</span>
+</div>
+<div class="flex justify-between items-center text-xs font-semibold text-emerald-600">
+<span>Discount</span>
+<div class="flex items-center gap-1 border-b border-emerald-600 border-dashed pb-0.5">
+<span class="material-symbols-outlined text-xs" data-icon="sell">sell</span>
+<input class="bg-transparent border-none p-0 text-xs w-20 focus:ring-0 placeholder:text-emerald-600/50" placeholder="Add code" type="text"/>
+</div>
+</div>
+<div class="pt-4 flex justify-between items-baseline">
+<span class="text-xs font-black uppercase tracking-widest text-on-surface opacity-60">Total Amount</span>
+<span class="text-2xl font-black text-on-surface tabular-nums">Rp 235.320</span>
+</div>
+</div>
+<!-- PAYMENT ACTIONS -->
+<div class="grid grid-cols-3 gap-2">
+<button class="flex flex-col items-center justify-center gap-1 bg-white border border-outline-variant/30 rounded-xl py-3 hover:bg-primary/5 hover:border-primary/30 transition-all active:scale-95 p-1">
+<span class="material-symbols-outlined text-primary" data-icon="payments">payments</span>
+<span class="text-[10px] font-bold uppercase text-on-surface-variant">Cash</span>
+</button>
+<button class="flex flex-col items-center justify-center gap-1 bg-white border border-outline-variant/30 rounded-xl py-3 hover:bg-primary/5 hover:border-primary/30 transition-all active:scale-95 p-1">
+<span class="material-symbols-outlined text-primary" data-icon="qr_code_2">qr_code_2</span>
+<span class="text-[10px] font-bold uppercase text-on-surface-variant">QRIS</span>
+</button>
+<button class="flex flex-col items-center justify-center gap-1 bg-white border border-outline-variant/30 rounded-xl py-3 hover:bg-primary/5 hover:border-primary/30 transition-all active:scale-95 p-1">
+<span class="material-symbols-outlined text-primary" data-icon="account_balance">account_balance</span>
+<span class="text-[10px] font-bold uppercase text-on-surface-variant">Bank</span>
+</button>
+</div>
+<button class="w-full bg-gradient-to-br from-primary to-primary-container text-white font-black py-4 rounded-xl shadow-lg shadow-primary/20 flex items-center justify-center gap-3 transition-all hover:opacity-90 active:scale-[0.98]">
+<span class="text-base">Complete Order</span>
+<span class="material-symbols-outlined" data-icon="arrow_forward">arrow_forward</span>
+</button>
+</div>
+</aside>
+</section>
+</main>
+<!-- FAB (Suppressed on POS focus screen as per logic but included for structural completeness if needed for sub-tasks) -->
+<!-- Hidden by default on POS page based on UX rule: "Suppress the FAB on... Details, and Transactional screens." -->
+</body></html>

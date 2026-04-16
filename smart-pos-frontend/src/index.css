@@ -1,0 +1,47 @@
+@import url("https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap");
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  :root {
+    --surface: 222 100% 99%;
+    --surface-container-low: 219 100% 97%;
+    --surface-container-lowest: 0 0% 100%;
+    --surface-container-highest: 215 100% 91%;
+    --primary: 161 100% 21%;
+    --primary-container: 159 84% 39%;
+    --on-surface: 213 63% 12%;
+    --on-surface-variant: 137 12% 27%;
+    --error: 0 76% 42%;
+    --outline-variant: 137 12% 76%;
+    --radius: 0.75rem;
+  }
+
+  * {
+    @apply border-outline-variant/15;
+  }
+
+  body {
+    @apply m-0 min-h-screen bg-surface font-sans text-on-surface antialiased;
+    text-rendering: optimizeLegibility;
+    font-feature-settings: "tnum" 1;
+  }
+}
+
+@layer utilities {
+  .tabular-nums-idr {
+    @apply tabular-nums;
+    font-variant-numeric: tabular-nums;
+  }
+
+  .cta-gradient {
+    background: linear-gradient(135deg, hsl(var(--primary)), hsl(var(--primary-container)));
+  }
+
+  .glass-panel {
+    background: hsl(var(--surface-container-lowest) / 0.8);
+    backdrop-filter: blur(12px);
+  }
+}

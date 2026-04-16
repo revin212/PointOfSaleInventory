@@ -1,0 +1,14 @@
+node_modules/
+dist/
+.DS_Store
+*.log
+
+# frontend artifacts
+smart-pos-frontend/node_modules/
+smart-pos-frontend/dist/
+smart-pos-frontend/.vite/
+
+# OS / editor
+.idea/
+.vscode/
+Thumbs.db

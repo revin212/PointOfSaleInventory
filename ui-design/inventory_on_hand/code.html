@@ -1,0 +1,362 @@
+<!DOCTYPE html>
+
+<html class="light" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<script id="tailwind-config">
+      tailwind.config = {
+        darkMode: "class",
+        theme: {
+          extend: {
+            "colors": {
+                    "surface-container-high": "#dce9ff",
+                    "inverse-surface": "#213145",
+                    "background": "#f8f9ff",
+                    "surface-container-lowest": "#ffffff",
+                    "surface-container": "#e5eeff",
+                    "on-surface": "#0b1c30",
+                    "surface-container-low": "#eff4ff",
+                    "on-tertiary": "#ffffff",
+                    "error-container": "#ffdad6",
+                    "secondary-container": "#b7ebce",
+                    "on-secondary": "#ffffff",
+                    "on-primary": "#ffffff",
+                    "tertiary": "#a43a3a",
+                    "on-secondary-fixed-variant": "#1e4f3a",
+                    "error": "#ba1a1a",
+                    "surface-bright": "#f8f9ff",
+                    "on-primary-fixed": "#002113",
+                    "on-secondary-fixed": "#002113",
+                    "primary-container": "#10b981",
+                    "on-background": "#0b1c30",
+                    "outline": "#6c7a71",
+                    "outline-variant": "#bbcabf",
+                    "tertiary-fixed": "#ffdad7",
+                    "on-error": "#ffffff",
+                    "secondary": "#376850",
+                    "surface-container-highest": "#d3e4fe",
+                    "on-surface-variant": "#3c4a42",
+                    "primary": "#006c49",
+                    "on-secondary-container": "#3c6c54",
+                    "surface-dim": "#cbdbf5",
+                    "surface-tint": "#006c49",
+                    "inverse-primary": "#4edea3",
+                    "inverse-on-surface": "#eaf1ff",
+                    "tertiary-fixed-dim": "#ffb3af",
+                    "surface-variant": "#d3e4fe",
+                    "primary-fixed-dim": "#4edea3",
+                    "on-tertiary-fixed-variant": "#842225",
+                    "on-primary-container": "#00422b",
+                    "secondary-fixed-dim": "#9ed2b5",
+                    "secondary-fixed": "#baeed1",
+                    "primary-fixed": "#6ffbbe",
+                    "on-primary-fixed-variant": "#005236",
+                    "surface": "#f8f9ff",
+                    "on-tertiary-fixed": "#410005",
+                    "on-error-container": "#93000a",
+                    "tertiary-container": "#fc7c78",
+                    "on-tertiary-container": "#711419"
+            },
+            "borderRadius": {
+                    "DEFAULT": "0.125rem",
+                    "lg": "0.25rem",
+                    "xl": "0.5rem",
+                    "full": "0.75rem"
+            },
+            "fontFamily": {
+                    "headline": ["Inter"],
+                    "body": ["Inter"],
+                    "label": ["Inter"]
+            }
+          },
+        },
+      }
+    </script>
+<style>
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        }
+        .tabular-nums { font-variant-numeric: tabular-nums; }
+        body { font-family: 'Inter', sans-serif; }
+    </style>
+</head>
+<body class="bg-background text-on-surface antialiased min-h-screen">
+<!-- TopNavBar -->
+<nav class="fixed top-0 w-full z-50 bg-[#f8f9ff]/80 backdrop-blur-xl flex justify-between items-center px-8 h-16 max-w-[1920px] mx-auto shadow-[0_20px_40px_-10px_rgba(11,28,48,0.06)]">
+<div class="flex items-center gap-8">
+<span class="text-xl font-bold tracking-tight text-[#006c49]">Emerald Ledger</span>
+<div class="hidden md:flex items-center gap-6">
+<a class="text-slate-500 hover:text-[#006c49] transition-colors" href="#">Products</a>
+<a class="text-[#006c49] border-b-2 border-[#006c49] pb-1 font-semibold" href="#">Inventory</a>
+<a class="text-slate-500 hover:text-[#006c49] transition-colors" href="#">Reports</a>
+</div>
+</div>
+<div class="flex items-center gap-4">
+<div class="relative group">
+<span class="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-slate-400">search</span>
+<input class="pl-10 pr-4 py-1.5 rounded-full bg-surface-container-low border-none focus:ring-2 focus:ring-primary w-64 text-sm transition-all" placeholder="Search stock..." type="text"/>
+</div>
+<button class="material-symbols-outlined p-2 text-slate-500 hover:bg-[#eff4ff] rounded-full transition-all">notifications</button>
+<button class="material-symbols-outlined p-2 text-slate-500 hover:bg-[#eff4ff] rounded-full transition-all">settings</button>
+<div class="h-8 w-8 rounded-full bg-primary-container overflow-hidden border-2 border-white shadow-sm">
+<img alt="User Profile" class="w-full h-full object-cover" data-alt="close-up portrait of a professional man in a business casual outfit with a friendly expression" src="https://lh3.googleusercontent.com/aida-public/AB6AXuCtig25I5F1dmQ3tbU_DySAuKI7y1AdT0jlkRNAvhyYF_mRrnXIamD_wIbt0Pr7OQWh-rxO_uCHi3fF4opKbycq-g7EZXeF8-0S2BtVDvUCuIlWNL2DlE_a9zCTr7aK8v7ybPLSTFezLCHIF26JZwiAFQ0QZ7rtVC2uLJLnYMvTHYXv8H3Fw2YQSKOQ2OQT3XjukYzUoQI_uLXd46jyrFbMNiiFIgFQVeIEAY9lNfTywPcn8nkaIqxze5vFAXXMw6OTUKkjqU0Udew"/>
+</div>
+</div>
+</nav>
+<!-- SideNavBar (Desktop Only) -->
+<aside class="hidden md:flex h-screen w-64 fixed left-0 top-0 bg-[#eff4ff] flex-col p-4 gap-2 pt-20 z-40">
+<div class="px-4 py-6 mb-4">
+<div class="flex items-center gap-3">
+<div class="h-10 w-10 bg-primary-container rounded-xl flex items-center justify-center text-white font-bold">TC</div>
+<div>
+<h2 class="text-lg font-black text-slate-900 leading-tight">The Curator</h2>
+<p class="text-[10px] uppercase tracking-widest text-slate-500 font-bold">Main Branch</p>
+</div>
+</div>
+</div>
+<nav class="flex flex-col gap-1 flex-1">
+<div class="flex items-center gap-3 px-4 py-3 text-slate-500 hover:bg-white/50 rounded-xl cursor-pointer transition-transform duration-200 hover:translate-x-1">
+<span class="material-symbols-outlined" data-icon="dashboard">dashboard</span>
+<span class="font-medium text-sm">Dashboard</span>
+</div>
+<div class="flex items-center gap-3 px-4 py-3 bg-white text-[#006c49] rounded-xl shadow-sm cursor-pointer transition-transform duration-200 hover:translate-x-1">
+<span class="material-symbols-outlined" data-icon="inventory_2">inventory_2</span>
+<span class="font-medium text-sm">Inventory</span>
+</div>
+<div class="flex items-center gap-3 px-4 py-3 text-slate-500 hover:bg-white/50 rounded-xl cursor-pointer transition-transform duration-200 hover:translate-x-1">
+<span class="material-symbols-outlined" data-icon="inventory">inventory</span>
+<span class="font-medium text-sm">Products</span>
+</div>
+<div class="flex items-center gap-3 px-4 py-3 text-slate-500 hover:bg-white/50 rounded-xl cursor-pointer transition-transform duration-200 hover:translate-x-1">
+<span class="material-symbols-outlined" data-icon="receipt_long">receipt_long</span>
+<span class="font-medium text-sm">Transactions</span>
+</div>
+<div class="flex items-center gap-3 px-4 py-3 text-slate-500 hover:bg-white/50 rounded-xl cursor-pointer transition-transform duration-200 hover:translate-x-1">
+<span class="material-symbols-outlined" data-icon="leaderboard">leaderboard</span>
+<span class="font-medium text-sm">Analytics</span>
+</div>
+</nav>
+<div class="mt-auto flex flex-col gap-1 pb-4">
+<button class="mx-4 mb-4 py-3 bg-gradient-to-br from-[#006c49] to-[#10b981] text-white rounded-xl font-bold shadow-lg shadow-primary/20 active:scale-95 transition-transform flex items-center justify-center gap-2">
+<span class="material-symbols-outlined text-sm">add</span>
+                New Entry
+            </button>
+<div class="flex items-center gap-3 px-4 py-3 text-slate-500 hover:bg-white/50 rounded-xl cursor-pointer transition-transform duration-200 hover:translate-x-1">
+<span class="material-symbols-outlined" data-icon="help_outline">help_outline</span>
+<span class="font-medium text-sm">Support</span>
+</div>
+<div class="flex items-center gap-3 px-4 py-3 text-slate-500 hover:bg-white/50 rounded-xl cursor-pointer transition-transform duration-200 hover:translate-x-1">
+<span class="material-symbols-outlined" data-icon="logout">logout</span>
+<span class="font-medium text-sm">Logout</span>
+</div>
+</div>
+</aside>
+<!-- Main Content Area -->
+<main class="md:pl-64 pt-20 pb-12 min-h-screen">
+<div class="max-w-7xl mx-auto px-8">
+<!-- Header Section -->
+<header class="mb-10 flex flex-col md:flex-row md:items-end justify-between gap-4">
+<div>
+<span class="text-[10px] font-bold tracking-[0.2em] text-primary uppercase mb-1 block">Warehouse Alpha</span>
+<h1 class="text-4xl font-black text-on-surface tracking-tight">Inventory On-Hand</h1>
+</div>
+<div class="flex gap-3">
+<button class="px-5 py-2.5 bg-surface-container-high text-on-surface rounded-xl font-semibold flex items-center gap-2 hover:bg-surface-container-highest transition-colors">
+<span class="material-symbols-outlined text-lg">filter_list</span>
+                        Filter View
+                    </button>
+<button class="px-5 py-2.5 bg-primary text-white rounded-xl font-semibold flex items-center gap-2 shadow-lg shadow-primary/20 hover:opacity-90 transition-opacity">
+<span class="material-symbols-outlined text-lg">download</span>
+                        Export Report
+                    </button>
+</div>
+</header>
+<!-- KPI Bento Grid -->
+<div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-12">
+<!-- Total Items -->
+<div class="bg-surface-container-low p-8 rounded-[2rem] relative overflow-hidden group">
+<div class="relative z-10">
+<span class="text-[11px] font-bold tracking-widest text-slate-400 uppercase">Total Items</span>
+<div class="mt-4 flex items-baseline gap-2">
+<span class="text-5xl font-extrabold text-on-surface tracking-tighter tabular-nums">4.280</span>
+<span class="text-primary font-bold text-sm">+12%</span>
+</div>
+<p class="text-sm text-slate-500 mt-2">Across 14 categories</p>
+</div>
+<span class="material-symbols-outlined absolute -right-4 -bottom-4 text-9xl text-slate-200/50 group-hover:scale-110 transition-transform duration-500">inventory_2</span>
+</div>
+<!-- Low Stock Items -->
+<div class="bg-tertiary-fixed p-8 rounded-[2rem] relative overflow-hidden group border-2 border-white/20">
+<div class="relative z-10">
+<span class="text-[11px] font-bold tracking-widest text-tertiary uppercase">Low Stock Alert</span>
+<div class="mt-4 flex items-baseline gap-2">
+<span class="text-5xl font-extrabold text-on-tertiary-fixed-variant tracking-tighter tabular-nums">24</span>
+<span class="text-tertiary-container font-bold text-sm">Critical</span>
+</div>
+<p class="text-sm text-on-tertiary-fixed-variant/70 mt-2">Needs immediate review</p>
+</div>
+<span class="material-symbols-outlined absolute -right-4 -bottom-4 text-9xl text-tertiary/10 group-hover:scale-110 transition-transform duration-500">warning</span>
+</div>
+<!-- Out of Stock -->
+<div class="bg-inverse-surface p-8 rounded-[2rem] relative overflow-hidden group">
+<div class="relative z-10">
+<span class="text-[11px] font-bold tracking-widest text-slate-400 uppercase">Out of Stock</span>
+<div class="mt-4 flex items-baseline gap-2">
+<span class="text-5xl font-extrabold text-white tracking-tighter tabular-nums">08</span>
+</div>
+<p class="text-sm text-slate-400 mt-2">Potential revenue loss</p>
+</div>
+<span class="material-symbols-outlined absolute -right-4 -bottom-4 text-9xl text-white/5 group-hover:scale-110 transition-transform duration-500">cancel</span>
+</div>
+</div>
+<!-- Main Content Grid -->
+<div class="grid grid-cols-1 lg:grid-cols-12 gap-8">
+<!-- Reorder Queue (6 columns) -->
+<section class="lg:col-span-7">
+<div class="flex items-center justify-between mb-6">
+<h3 class="text-xl font-bold text-on-surface">Critical Reorder Queue</h3>
+<a class="text-sm font-semibold text-primary hover:underline" href="#">View All</a>
+</div>
+<div class="space-y-4">
+<!-- Product Item -->
+<div class="bg-white p-5 rounded-2xl shadow-sm flex items-center justify-between group hover:shadow-md transition-shadow border border-slate-100">
+<div class="flex items-center gap-4">
+<div class="w-14 h-14 rounded-xl bg-slate-100 overflow-hidden">
+<img alt="Product" class="w-full h-full object-cover" data-alt="close-up of a premium minimalist white smartwatch with a silicone strap on a clean background" src="https://lh3.googleusercontent.com/aida-public/AB6AXuBCtuVh15kjYxiWY0SXp-NBSIf9y_iOemEIFdJv6ihiLb7XDf6E1mvZsu8dWdbcn1ieI3B0wKQtsGZWtRvwMVTW1PoWmcRmloMGvTNJIAv135gNqo5X1TNMea6VFIzCaeW8IUJB5ktRoTK_WtNQ57-xA1VZOjZr9ZtKRV5cnsCNZlk6G5U5hEg8NE4Z9v6JRbSeFnpUGjlpPY4YeDTyt-TotOqorO6mmX74uigPTVPRdwhh-8MGWKm0cbIeH4CZMsBymj4kKX_eEoo"/>
+</div>
+<div>
+<h4 class="font-bold text-on-surface">Nexus Smartwatch V2</h4>
+<p class="text-xs text-slate-400 font-medium">SKU: NEX-V2-WHT</p>
+<div class="flex items-center gap-2 mt-1">
+<div class="h-1.5 w-24 bg-surface-container rounded-full overflow-hidden">
+<div class="h-full bg-error w-[15%]"></div>
+</div>
+<span class="text-[10px] font-bold text-error">12 left / 80 threshold</span>
+</div>
+</div>
+</div>
+<button class="px-4 py-2 bg-primary-container/10 text-primary font-bold rounded-lg hover:bg-primary-container hover:text-white transition-all text-sm">
+                                Restock
+                            </button>
+</div>
+<!-- Product Item -->
+<div class="bg-white p-5 rounded-2xl shadow-sm flex items-center justify-between group hover:shadow-md transition-shadow border border-slate-100">
+<div class="flex items-center gap-4">
+<div class="w-14 h-14 rounded-xl bg-slate-100 overflow-hidden">
+<img alt="Product" class="w-full h-full object-cover" data-alt="overhead view of high-quality professional studio headphones in black and gold on a grey surface" src="https://lh3.googleusercontent.com/aida-public/AB6AXuAq-vDv4Y0Lt6_mfYGvAqU6-9ObE6wSIw5cgewxzaADcuxlU2GmM2I_LyV2r43SIqQ20u6LQXubn4ocl1teycutuRCWBNaUHKo1KhNpoe6H9GtGGDZIS_ZYLDU5hmyJfno70H5_wGIGxy-9K4VeA7jZ7LnYTapy88x1IgOkXouF3791uhGHsWBJonJoAivPXNlXKVdZiVfNRix4jy3hIwG-tJyqePTFcQoONzahaFEA-hta89SvWzN8VOcKUUytl3__nFWyh_0G0qc"/>
+</div>
+<div>
+<h4 class="font-bold text-on-surface">Aura Studio Headphones</h4>
+<p class="text-xs text-slate-400 font-medium">SKU: AUR-ST-900</p>
+<div class="flex items-center gap-2 mt-1">
+<div class="h-1.5 w-24 bg-surface-container rounded-full overflow-hidden">
+<div class="h-full bg-error w-[5%]"></div>
+</div>
+<span class="text-[10px] font-bold text-error">02 left / 40 threshold</span>
+</div>
+</div>
+</div>
+<button class="px-4 py-2 bg-primary-container/10 text-primary font-bold rounded-lg hover:bg-primary-container hover:text-white transition-all text-sm">
+                                Restock
+                            </button>
+</div>
+<!-- Product Item -->
+<div class="bg-white p-5 rounded-2xl shadow-sm flex items-center justify-between group hover:shadow-md transition-shadow border border-slate-100">
+<div class="flex items-center gap-4">
+<div class="w-14 h-14 rounded-xl bg-slate-100 overflow-hidden">
+<img alt="Product" class="w-full h-full object-cover" data-alt="pair of premium designer sunglasses with dark lenses and gold frames on a reflective white surface" src="https://lh3.googleusercontent.com/aida-public/AB6AXuAfLCMXLChAh8qDUxFndKCURZhVjnYlQEcJHIZwVmS73qXpyjV0ItRPPtpuvNorBsEP-ovdSl3MJ1Dux7gp7TVGuCkp-8-VQHIGphfubyh_IkZRxXYIYKqgoRofGGMjn1hPGeqxFeFFsNHoz_25BlVBjZ0v9upOa-yRsmC6daNUpteiGTJ-Es_OaiQnp31tyAKdzqKA2Mxs1bVcvP8INLwTy7KWIon-6TQI7RjDTmYcMzjFRQmiihagwImuylVxcIGGOCxFwkDOXNI"/>
+</div>
+<div>
+<h4 class="font-bold text-on-surface">Horizon Aviators</h4>
+<p class="text-xs text-slate-400 font-medium">SKU: HOR-AV-GLD</p>
+<div class="flex items-center gap-2 mt-1">
+<div class="h-1.5 w-24 bg-surface-container rounded-full overflow-hidden">
+<div class="h-full bg-error w-[20%]"></div>
+</div>
+<span class="text-[10px] font-bold text-error">18 left / 90 threshold</span>
+</div>
+</div>
+</div>
+<button class="px-4 py-2 bg-primary-container/10 text-primary font-bold rounded-lg hover:bg-primary-container hover:text-white transition-all text-sm">
+                                Restock
+                            </button>
+</div>
+</div>
+</section>
+<!-- Stock Distribution (5 columns) -->
+<section class="lg:col-span-5">
+<div class="bg-white p-8 rounded-[2rem] border border-slate-100 h-full">
+<h3 class="text-xl font-bold text-on-surface mb-8">Stock by Category</h3>
+<div class="space-y-6">
+<div>
+<div class="flex justify-between items-center mb-2">
+<span class="text-sm font-semibold text-slate-600">Electronics</span>
+<span class="text-sm font-bold text-on-surface tabular-nums">1.240 units</span>
+</div>
+<div class="h-3 w-full bg-slate-100 rounded-full overflow-hidden">
+<div class="h-full bg-primary w-[45%] rounded-full"></div>
+</div>
+</div>
+<div>
+<div class="flex justify-between items-center mb-2">
+<span class="text-sm font-semibold text-slate-600">Accessories</span>
+<span class="text-sm font-bold text-on-surface tabular-nums">842 units</span>
+</div>
+<div class="h-3 w-full bg-slate-100 rounded-full overflow-hidden">
+<div class="h-full bg-primary-container w-[30%] rounded-full"></div>
+</div>
+</div>
+<div>
+<div class="flex justify-between items-center mb-2">
+<span class="text-sm font-semibold text-slate-600">Home Decor</span>
+<span class="text-sm font-bold text-on-surface tabular-nums">1.120 units</span>
+</div>
+<div class="h-3 w-full bg-slate-100 rounded-full overflow-hidden">
+<div class="h-full bg-primary w-[40%] rounded-full"></div>
+</div>
+</div>
+<div>
+<div class="flex justify-between items-center mb-2">
+<span class="text-sm font-semibold text-slate-600">Apparel</span>
+<span class="text-sm font-bold text-on-surface tabular-nums">650 units</span>
+</div>
+<div class="h-3 w-full bg-slate-100 rounded-full overflow-hidden">
+<div class="h-full bg-primary-container w-[25%] rounded-full"></div>
+</div>
+</div>
+<div class="pt-8 border-t border-slate-50">
+<div class="flex gap-4">
+<div class="flex-1 bg-surface-container-low p-4 rounded-2xl">
+<p class="text-[10px] font-bold text-slate-400 uppercase">Valuation</p>
+<p class="text-lg font-bold text-on-surface mt-1">Rp 1.4B</p>
+</div>
+<div class="flex-1 bg-surface-container-low p-4 rounded-2xl">
+<p class="text-[10px] font-bold text-slate-400 uppercase">Turnover</p>
+<p class="text-lg font-bold text-on-surface mt-1">4.2x / mo</p>
+</div>
+</div>
+</div>
+</div>
+</div>
+</section>
+</div>
+</div>
+</main>
+<!-- Footer -->
+<footer class="md:pl-64 bg-[#f8f9ff] border-t border-slate-200/15">
+<div class="w-full py-12 flex flex-col items-center gap-4 text-center px-8">
+<p class="font-['Inter'] text-[11px] tracking-wider uppercase text-slate-400 font-medium">
+                © 2024 Emerald Ledger POS • Precision Inventory System
+            </p>
+<div class="flex gap-8">
+<a class="font-['Inter'] text-[11px] tracking-wider uppercase text-slate-400 hover:text-[#006c49] transition-opacity" href="#">Documentation</a>
+<a class="font-['Inter'] text-[11px] tracking-wider uppercase text-slate-400 hover:text-[#006c49] transition-opacity" href="#">Privacy Policy</a>
+<a class="font-['Inter'] text-[11px] tracking-wider uppercase text-slate-400 hover:text-[#006c49] transition-opacity" href="#">System Status</a>
+</div>
+</div>
+</footer>
+</body></html>
