@@ -2,8 +2,14 @@ import { createBrowserRouter, Navigate } from "react-router-dom";
 
 import { AppShell } from "@/components/layout/app-shell";
 import { LoginPage } from "@/features/auth/login-page";
+import { CategoriesPage } from "@/features/catalog/categories-page";
+import { ProductsPage } from "@/features/catalog/products-page";
+import { SuppliersPage } from "@/features/catalog/suppliers-page";
 import { FoundationPage } from "@/features/foundation/foundation-page";
 import { ModulePlaceholderPage } from "@/features/placeholder/module-placeholder-page";
+import { PosPage } from "@/features/pos/pos-page";
+import { SaleDetailPage } from "@/features/sales/sale-detail-page";
+import { SalesPage } from "@/features/sales/sales-page";
 import { ProtectedRoute } from "@/router/route-guards";
 import { ROLE } from "@/types/enums";
 
@@ -17,14 +23,20 @@ export const appRouter = createBrowserRouter([
         children: [
           { index: true, element: <Navigate to="/dashboard" replace /> },
           { path: "/dashboard", element: <FoundationPage /> },
-          { path: "/pos", element: <ModulePlaceholderPage moduleName="POS" /> },
-          { path: "/sales", element: <ModulePlaceholderPage moduleName="Sales" /> },
-          { path: "/products", element: <ModulePlaceholderPage moduleName="Products" /> },
-          { path: "/categories", element: <ModulePlaceholderPage moduleName="Categories" /> },
-          { path: "/suppliers", element: <ModulePlaceholderPage moduleName="Suppliers" /> },
+          { path: "/pos", element: <PosPage /> },
+          { path: "/sales", element: <SalesPage /> },
+          { path: "/sales/:id", element: <SaleDetailPage /> },
+          { path: "/products", element: <ProductsPage /> },
           { path: "/purchases", element: <ModulePlaceholderPage moduleName="Purchases" /> },
           { path: "/inventory", element: <ModulePlaceholderPage moduleName="Inventory" /> },
           { path: "/reports", element: <ModulePlaceholderPage moduleName="Reports" /> },
+        ],
+      },
+      {
+        element: <ProtectedRoute allowedRoles={[ROLE.OWNER, ROLE.WAREHOUSE]} />,
+        children: [
+          { path: "/categories", element: <CategoriesPage /> },
+          { path: "/suppliers", element: <SuppliersPage /> },
         ],
       },
       {
