@@ -13,3 +13,11 @@ export const PAYMENT_METHOD = {
 } as const;
 
 export type PaymentMethod = (typeof PAYMENT_METHOD)[keyof typeof PAYMENT_METHOD];
+
+export const PURCHASE_STATUS = {
+  DRAFT: "DRAFT",
+  OPEN: "OPEN",
+  PARTIALLY_RECEIVED: "PARTIALLY_RECEIVED",
+  RECEIVED: "RECEIVED",
+  CANCELLED: "CANCELLED",
+} as const;
