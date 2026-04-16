@@ -5,7 +5,7 @@ import { LoginPage } from "@/features/auth/login-page";
 import { CategoriesPage } from "@/features/catalog/categories-page";
 import { ProductsPage } from "@/features/catalog/products-page";
 import { SuppliersPage } from "@/features/catalog/suppliers-page";
-import { FoundationPage } from "@/features/foundation/foundation-page";
+import { DashboardPage } from "@/features/dashboard/dashboard-page";
 import { InventoryPage } from "@/features/inventory/inventory-page";
 import { StockAdjustmentsPage } from "@/features/inventory/stock-adjustments-page";
 import { PosPage } from "@/features/pos/pos-page";
@@ -27,7 +27,7 @@ export const appRouter = createBrowserRouter([
         element: <AppShell />,
         children: [
           { index: true, element: <Navigate to="/dashboard" replace /> },
-          { path: "/dashboard", element: <FoundationPage /> },
+          { path: "/dashboard", element: <DashboardPage /> },
           { path: "/pos", element: <PosPage /> },
           { path: "/sales", element: <SalesPage /> },
           { path: "/sales/:id", element: <SaleDetailPage /> },
