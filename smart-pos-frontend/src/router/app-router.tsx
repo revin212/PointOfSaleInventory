@@ -6,6 +6,8 @@ import { CategoriesPage } from "@/features/catalog/categories-page";
 import { ProductsPage } from "@/features/catalog/products-page";
 import { SuppliersPage } from "@/features/catalog/suppliers-page";
 import { FoundationPage } from "@/features/foundation/foundation-page";
+import { InventoryPage } from "@/features/inventory/inventory-page";
+import { StockAdjustmentsPage } from "@/features/inventory/stock-adjustments-page";
 import { ModulePlaceholderPage } from "@/features/placeholder/module-placeholder-page";
 import { PosPage } from "@/features/pos/pos-page";
 import { PurchaseReceivePage } from "@/features/purchases/purchase-receive-page";
@@ -29,7 +31,6 @@ export const appRouter = createBrowserRouter([
           { path: "/sales", element: <SalesPage /> },
           { path: "/sales/:id", element: <SaleDetailPage /> },
           { path: "/products", element: <ProductsPage /> },
-          { path: "/inventory", element: <ModulePlaceholderPage moduleName="Inventory" /> },
           { path: "/reports", element: <ModulePlaceholderPage moduleName="Reports" /> },
         ],
       },
@@ -40,6 +41,8 @@ export const appRouter = createBrowserRouter([
           { path: "/suppliers", element: <SuppliersPage /> },
           { path: "/purchases", element: <PurchasesPage /> },
           { path: "/purchases/:id/receive", element: <PurchaseReceivePage /> },
+          { path: "/inventory", element: <InventoryPage /> },
+          { path: "/stock-adjustments", element: <StockAdjustmentsPage /> },
         ],
       },
       {
