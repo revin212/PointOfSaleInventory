@@ -10,6 +10,8 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { useAuth } from "@/features/auth/auth-context";
+import { USE_MOCKS } from "@/lib/env";
+import { ApiError } from "@/lib/api-error";
 import { ROLE, type Role } from "@/types/enums";
 
 const loginSchema = z.object({
@@ -28,8 +30,8 @@ const roleLanding: Record<Role, string> = {
 
 export function LoginPage() {
   const navigate = useNavigate();
-  const { loginAs } = useAuth();
-  const [invalidCredentials, setInvalidCredentials] = useState(false);
+  const { login } = useAuth();
+  const [errorMessage, setErrorMessage] = useState<string | null>(null);
 
   const {
     register,
@@ -37,11 +39,9 @@ export function LoginPage() {
     formState: { errors, isSubmitting },
   } = useForm<LoginFormValues>({
     resolver: zodResolver(loginSchema),
-    defaultValues: {
-      email: "owner@store.com",
-      password: "password123",
-      role: ROLE.OWNER,
-    },
+    defaultValues: USE_MOCKS
+      ? { email: "owner@store.com", password: "password123", role: ROLE.OWNER }
+      : { email: "owner@smartpos.local", password: "Password123!", role: ROLE.OWNER },
   });
 
   const roleOptions = useMemo(
@@ -54,16 +54,28 @@ export function LoginPage() {
   );
 
   const onSubmit = async (values: LoginFormValues) => {
-    setInvalidCredentials(false);
-
-    // Mock v1 login behavior until backend auth integration module.
-    if (!values.email.endsWith("@store.com") || values.password !== "password123") {
-      setInvalidCredentials(true);
-      return;
+    setErrorMessage(null);
+    try {
+      if (USE_MOCKS) {
+        if (!values.email.endsWith("@store.com") || values.password !== "password123") {
+          setErrorMessage("Use an @store.com email and password123 for mock mode.");
+          return;
+        }
+        const user = await login(values.email, values.password, values.role);
+        navigate(roleLanding[user.role], { replace: true });
+        return;
+      }
+      const user = await login(values.email, values.password);
+      navigate(roleLanding[user.role], { replace: true });
+    } catch (error) {
+      if (error instanceof ApiError) {
+        setErrorMessage(error.message || "Invalid email or password.");
+      } else if (error instanceof Error) {
+        setErrorMessage(error.message);
+      } else {
+        setErrorMessage("Unexpected error. Please try again.");
+      }
     }
-
-    loginAs(values.role);
-    navigate(roleLanding[values.role], { replace: true });
   };
 
   return (
@@ -79,7 +91,11 @@ export function LoginPage() {
         <Card className="shadow-ambient">
           <CardHeader>
             <CardTitle className="text-2xl font-black">Sign in to POS</CardTitle>
-            <CardDescription>Access your store dashboard with your assigned role.</CardDescription>
+            <CardDescription>
+              {USE_MOCKS
+                ? "Mock mode: pick any role to explore the UI."
+                : "Sign in with the credentials provisioned by your owner account."}
+            </CardDescription>
           </CardHeader>
           <CardContent>
             <form className="space-y-4" onSubmit={handleSubmit(onSubmit)} noValidate>
@@ -87,7 +103,7 @@ export function LoginPage() {
                 <label className="text-xs font-bold uppercase tracking-widest text-on-surface-variant" htmlFor="email">
                   Email
                 </label>
-                <Input id="email" type="email" placeholder="owner@store.com" {...register("email")} />
+                <Input id="email" type="email" placeholder="owner@smartpos.local" {...register("email")} />
                 {errors.email ? <p className="text-xs text-error">{errors.email.message}</p> : null}
               </div>
               <div className="space-y-1.5">
@@ -99,12 +115,13 @@ export function LoginPage() {
               </div>
               <div className="space-y-1.5">
                 <label className="text-xs font-bold uppercase tracking-widest text-on-surface-variant" htmlFor="role">
-                  Role
+                  Role {USE_MOCKS ? "" : "(ignored — role comes from backend)"}
                 </label>
                 <select
                   id="role"
                   className="h-10 w-full rounded-xl border border-outline-variant/30 bg-surface-container-low px-3 text-sm focus:outline-none focus:ring-2 focus:ring-primary"
                   {...register("role")}
+                  disabled={!USE_MOCKS}
                 >
                   {roleOptions.map((role) => (
                     <option key={role.value} value={role.value}>
@@ -120,10 +137,10 @@ export function LoginPage() {
             </form>
           </CardContent>
         </Card>
-        {invalidCredentials ? (
+        {errorMessage ? (
           <ErrorBlock
-            title="Invalid credentials"
-            description="Use an @store.com email and password123 for this seeded v1 frontend."
+            title="Sign-in failed"
+            description={errorMessage}
           />
         ) : null}
       </div>

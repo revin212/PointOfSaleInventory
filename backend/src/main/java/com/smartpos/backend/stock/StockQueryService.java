@@ -12,10 +12,12 @@ import com.smartpos.backend.users.UserEntity;
 import com.smartpos.backend.users.UserRepository;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.Instant;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -43,7 +45,7 @@ public class StockQueryService {
 
     @Transactional(readOnly = true)
     public Page<OnHandResponse> onHand(String query, UUID categoryId, boolean lowOnly, Pageable pageable) {
-        String q = (query == null || query.isBlank()) ? null : query.trim();
+        String q = (query == null || query.isBlank()) ? "" : query.trim().toLowerCase();
         Page<ProductEntity> page = productRepository.searchForStock(q, categoryId, lowOnly, pageable);
 
         List<UUID> productIds = page.getContent().stream().map(ProductEntity::getId).toList();
@@ -81,7 +83,16 @@ public class StockQueryService {
     @Transactional(readOnly = true)
     public Page<StockMovementResponse> movements(UUID productId, StockMovementType type,
                                                  Instant from, Instant to, Pageable pageable) {
-        Page<StockMovementEntity> page = movementRepository.search(productId, type, from, to, pageable);
+        Specification<StockMovementEntity> spec = (root, q, cb) -> {
+            List<jakarta.persistence.criteria.Predicate> predicates = new ArrayList<>();
+            if (productId != null) predicates.add(cb.equal(root.get("productId"), productId));
+            if (type != null)      predicates.add(cb.equal(root.get("type"), type));
+            if (from != null)      predicates.add(cb.greaterThanOrEqualTo(root.get("createdAt"), from));
+            if (to != null)        predicates.add(cb.lessThan(root.get("createdAt"), to));
+            q.orderBy(cb.desc(root.get("createdAt")), cb.desc(root.get("id")));
+            return cb.and(predicates.toArray(new jakarta.persistence.criteria.Predicate[0]));
+        };
+        Page<StockMovementEntity> page = movementRepository.findAll(spec, pageable);
 
         Set<UUID> productIds = page.getContent().stream().map(StockMovementEntity::getProductId).collect(Collectors.toSet());
         Set<UUID> userIds = page.getContent().stream()

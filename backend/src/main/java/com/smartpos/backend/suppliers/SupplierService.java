@@ -25,7 +25,7 @@ public class SupplierService {
 
     @Transactional(readOnly = true)
     public Page<SupplierResponse> list(String query, Pageable pageable) {
-        String q = (query == null || query.isBlank()) ? null : query.trim();
+        String q = (query == null || query.isBlank()) ? "" : query.trim().toLowerCase();
         return supplierRepository.search(q, pageable).map(SupplierResponse::from);
     }
 

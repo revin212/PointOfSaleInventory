@@ -12,8 +12,8 @@ public interface SupplierRepository extends JpaRepository<SupplierEntity, UUID> 
 
     @Query("""
             SELECT s FROM SupplierEntity s
-            WHERE (:query IS NULL OR LOWER(s.name) LIKE LOWER(CONCAT('%', :query, '%'))
-                    OR LOWER(COALESCE(s.phone, '')) LIKE LOWER(CONCAT('%', :query, '%')))
+            WHERE (LOWER(s.name) LIKE CONCAT('%', :query, '%')
+                    OR LOWER(COALESCE(s.phone, '')) LIKE CONCAT('%', :query, '%'))
             """)
     Page<SupplierEntity> search(@Param("query") String query, Pageable pageable);
 }

@@ -7,6 +7,7 @@ import com.smartpos.backend.users.UserEntity;
 import com.smartpos.backend.users.UserRepository;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Sort;
+import org.springframework.data.jpa.domain.Specification;
 import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.transaction.annotation.Transactional;
@@ -18,7 +19,9 @@ import org.springframework.web.bind.annotation.RestController;
 import java.time.Instant;
 import java.time.LocalDate;
 import java.time.ZoneOffset;
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.UUID;
@@ -50,7 +53,16 @@ public class AuditController {
     ) {
         Instant fromI = from == null ? null : from.atStartOfDay().toInstant(ZoneOffset.UTC);
         Instant toI   = to   == null ? null : to.plusDays(1).atStartOfDay().toInstant(ZoneOffset.UTC);
-        Page<AuditLogEntity> result = repository.search(entityType, action, userId, fromI, toI,
+        Specification<AuditLogEntity> spec = (root, q, cb) -> {
+            List<jakarta.persistence.criteria.Predicate> predicates = new ArrayList<>();
+            if (entityType != null) predicates.add(cb.equal(root.get("entityType"), entityType));
+            if (action != null)     predicates.add(cb.equal(root.get("action"), action));
+            if (userId != null)     predicates.add(cb.equal(root.get("userId"), userId));
+            if (fromI != null)      predicates.add(cb.greaterThanOrEqualTo(root.get("createdAt"), fromI));
+            if (toI != null)        predicates.add(cb.lessThan(root.get("createdAt"), toI));
+            return cb.and(predicates.toArray(new jakarta.persistence.criteria.Predicate[0]));
+        };
+        Page<AuditLogEntity> result = repository.findAll(spec,
                 PageableSupport.resolve(page, size, Sort.by(Sort.Direction.DESC, "createdAt")));
 
         Set<UUID> userIds = result.getContent().stream()

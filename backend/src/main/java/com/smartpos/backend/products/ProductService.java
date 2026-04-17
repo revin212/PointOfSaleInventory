@@ -31,7 +31,7 @@ public class ProductService {
 
     @Transactional(readOnly = true)
     public Page<ProductResponse> list(String query, UUID categoryId, Boolean active, Pageable pageable) {
-        String q = (query == null || query.isBlank()) ? null : query.trim();
+        String q = (query == null || query.isBlank()) ? "" : query.trim().toLowerCase();
         Page<ProductEntity> page = productRepository.search(q, categoryId, active, pageable);
 
         Map<UUID, String> categoryNames = resolveCategoryNames(

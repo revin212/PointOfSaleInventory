@@ -14,7 +14,7 @@ public interface CategoryRepository extends JpaRepository<CategoryEntity, UUID> 
 
     @Query("""
             SELECT c FROM CategoryEntity c
-            WHERE (:query IS NULL OR LOWER(c.name) LIKE LOWER(CONCAT('%', :query, '%')))
+            WHERE LOWER(c.name) LIKE CONCAT('%', :query, '%')
             """)
     Page<CategoryEntity> search(@Param("query") String query, Pageable pageable);
 }

@@ -39,7 +39,7 @@ public class UserService {
 
     @Transactional(readOnly = true)
     public Page<UserResponse> list(String query, Pageable pageable) {
-        String q = (query == null || query.isBlank()) ? null : query.trim();
+        String q = (query == null || query.isBlank()) ? "" : query.trim().toLowerCase();
         return userRepository.search(q, pageable).map(UserResponse::from);
     }
 

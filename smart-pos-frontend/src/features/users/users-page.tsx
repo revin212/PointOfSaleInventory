@@ -18,10 +18,11 @@ const schema = z.object({
   email: z.string().email("Valid email is required"),
   role: z.enum([ROLE.OWNER, ROLE.CASHIER, ROLE.WAREHOUSE]),
   active: z.boolean(),
+  password: z.string().optional(),
 });
 
 type FormValues = z.infer<typeof schema>;
-const defaults: FormValues = { name: "", email: "", role: ROLE.CASHIER, active: true };
+const defaults: FormValues = { name: "", email: "", role: ROLE.CASHIER, active: true, password: "" };
 
 const roleOptions: Array<{ value: Role; label: string }> = [
   { value: ROLE.OWNER, label: "Owner" },
@@ -47,7 +48,12 @@ export function UsersPage() {
   });
 
   const createMutation = useMutation({
-    mutationFn: createUser,
+    mutationFn: (values: FormValues) => {
+      if (!values.password || values.password.length < 8) {
+        throw new Error("Password must be at least 8 characters for new users.");
+      }
+      return createUser(values);
+    },
     onSuccess: async () => {
       await queryClient.invalidateQueries({ queryKey: ["users"] });
       form.reset(defaults);
@@ -115,7 +121,7 @@ export function UsersPage() {
                         size="sm"
                         onClick={() => {
                           setEditing(row);
-                          form.reset({ name: row.name, email: row.email, role: row.role, active: row.active });
+                          form.reset({ name: row.name, email: row.email, role: row.role, active: row.active, password: "" });
                         }}
                       >
                         Edit
@@ -141,6 +147,11 @@ export function UsersPage() {
           <form className="space-y-2" onSubmit={form.handleSubmit((values) => (editing ? updateMutation.mutate(values) : createMutation.mutate(values)))}>
             <Input placeholder="Name" {...form.register("name")} />
             <Input placeholder="Email" {...form.register("email")} />
+            <Input
+              type="password"
+              placeholder={editing ? "New password (leave blank to keep)" : "Password (min 8 chars)"}
+              {...form.register("password")}
+            />
             <select className="h-10 rounded-xl border border-outline-variant/30 bg-surface-container-low px-3 text-sm" {...form.register("role")}>
               {roleOptions.map((option) => (
                 <option key={option.value} value={option.value}>

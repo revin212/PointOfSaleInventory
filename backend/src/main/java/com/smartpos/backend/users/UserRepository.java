@@ -17,8 +17,8 @@ public interface UserRepository extends JpaRepository<UserEntity, UUID> {
 
     @Query("""
             SELECT u FROM UserEntity u
-            WHERE (:query IS NULL OR LOWER(u.name) LIKE LOWER(CONCAT('%', :query, '%'))
-                    OR LOWER(u.email) LIKE LOWER(CONCAT('%', :query, '%')))
+            WHERE (LOWER(u.name) LIKE CONCAT('%', :query, '%')
+                    OR LOWER(u.email) LIKE CONCAT('%', :query, '%'))
             """)
     Page<UserEntity> search(@Param("query") String query, Pageable pageable);
 }

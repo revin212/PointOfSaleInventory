@@ -16,6 +16,7 @@ import com.smartpos.backend.users.UserEntity;
 import com.smartpos.backend.users.UserRepository;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -24,6 +25,7 @@ import java.math.RoundingMode;
 import java.time.Instant;
 import java.time.ZoneOffset;
 import java.time.format.DateTimeFormatter;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -193,7 +195,15 @@ public class SaleService {
     public Page<SaleSummaryResponse> list(Instant from, Instant to, UUID cashierId,
                                           com.smartpos.backend.domain.enums.PaymentMethod paymentMethod,
                                           Pageable pageable) {
-        Page<SaleEntity> page = saleRepository.search(from, to, cashierId, paymentMethod, pageable);
+        Specification<SaleEntity> spec = (root, q, cb) -> {
+            List<jakarta.persistence.criteria.Predicate> predicates = new ArrayList<>();
+            if (from != null)          predicates.add(cb.greaterThanOrEqualTo(root.get("createdAt"), from));
+            if (to != null)            predicates.add(cb.lessThan(root.get("createdAt"), to));
+            if (cashierId != null)     predicates.add(cb.equal(root.get("cashierId"), cashierId));
+            if (paymentMethod != null) predicates.add(cb.equal(root.get("paymentMethod"), paymentMethod));
+            return cb.and(predicates.toArray(new jakarta.persistence.criteria.Predicate[0]));
+        };
+        Page<SaleEntity> page = saleRepository.findAll(spec, pageable);
         Map<UUID, String> cashierNames = resolveCashierNames(
                 page.getContent().stream().map(SaleEntity::getCashierId).collect(Collectors.toSet()));
         return page.map(s -> new SaleSummaryResponse(

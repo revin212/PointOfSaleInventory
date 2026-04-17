@@ -19,9 +19,9 @@ public interface ProductRepository extends JpaRepository<ProductEntity, UUID> {
 
     @Query("""
             SELECT p FROM ProductEntity p
-            WHERE (:query IS NULL OR LOWER(p.name) LIKE LOWER(CONCAT('%', :query, '%'))
-                    OR LOWER(p.sku) LIKE LOWER(CONCAT('%', :query, '%'))
-                    OR LOWER(COALESCE(p.barcode, '')) LIKE LOWER(CONCAT('%', :query, '%')))
+            WHERE (LOWER(p.name) LIKE CONCAT('%', :query, '%')
+                    OR LOWER(p.sku) LIKE CONCAT('%', :query, '%')
+                    OR LOWER(COALESCE(p.barcode, '')) LIKE CONCAT('%', :query, '%'))
               AND (:categoryId IS NULL OR p.categoryId = :categoryId)
               AND (:active IS NULL OR p.active = :active)
             """)
@@ -32,9 +32,9 @@ public interface ProductRepository extends JpaRepository<ProductEntity, UUID> {
 
     @Query("""
             SELECT p FROM ProductEntity p
-            WHERE (:query IS NULL OR LOWER(p.name) LIKE LOWER(CONCAT('%', :query, '%'))
-                    OR LOWER(p.sku) LIKE LOWER(CONCAT('%', :query, '%'))
-                    OR LOWER(COALESCE(p.barcode, '')) LIKE LOWER(CONCAT('%', :query, '%')))
+            WHERE (LOWER(p.name) LIKE CONCAT('%', :query, '%')
+                    OR LOWER(p.sku) LIKE CONCAT('%', :query, '%')
+                    OR LOWER(COALESCE(p.barcode, '')) LIKE CONCAT('%', :query, '%'))
               AND (:categoryId IS NULL OR p.categoryId = :categoryId)
               AND (:lowOnly = FALSE OR
                    (SELECT COALESCE(SUM(m.qtyDelta), 0)

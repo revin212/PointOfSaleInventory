@@ -16,10 +16,12 @@ import com.smartpos.backend.suppliers.SupplierEntity;
 import com.smartpos.backend.suppliers.SupplierRepository;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigDecimal;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -56,7 +58,13 @@ public class PurchaseService {
 
     @Transactional(readOnly = true)
     public Page<PurchaseSummaryResponse> list(PurchaseStatus status, UUID supplierId, Pageable pageable) {
-        Page<PurchaseEntity> page = purchaseRepository.search(status, supplierId, pageable);
+        Specification<PurchaseEntity> spec = (root, q, cb) -> {
+            List<jakarta.persistence.criteria.Predicate> predicates = new ArrayList<>();
+            if (status != null)     predicates.add(cb.equal(root.get("status"), status));
+            if (supplierId != null) predicates.add(cb.equal(root.get("supplierId"), supplierId));
+            return cb.and(predicates.toArray(new jakarta.persistence.criteria.Predicate[0]));
+        };
+        Page<PurchaseEntity> page = purchaseRepository.findAll(spec, pageable);
         Map<UUID, String> supplierNames = resolveSupplierNames(
                 page.getContent().stream().map(PurchaseEntity::getSupplierId).collect(Collectors.toSet()));
         return page.map(p -> toSummary(p, supplierNames.get(p.getSupplierId())));

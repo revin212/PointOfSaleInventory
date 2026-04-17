@@ -25,7 +25,7 @@ public class CategoryService {
 
     @Transactional(readOnly = true)
     public Page<CategoryResponse> list(String query, Pageable pageable) {
-        String q = (query == null || query.isBlank()) ? null : query.trim();
+        String q = (query == null || query.isBlank()) ? "" : query.trim().toLowerCase();
         return categoryRepository.search(q, pageable).map(CategoryResponse::from);
     }
 

@@ -11,7 +11,8 @@ import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { useAuth } from "@/features/auth/auth-context";
-import { createStockAdjustment, getStockProducts, listMovements } from "@/features/inventory/inventory-service";
+import { listProducts } from "@/features/catalog/catalog-service";
+import { createStockAdjustment, listMovements } from "@/features/inventory/inventory-service";
 import { ROLE } from "@/types/enums";
 
 const adjustmentSchema = z.object({
@@ -40,6 +41,12 @@ export function StockAdjustmentsPage() {
     enabled: canManage,
   });
 
+  const productsQuery = useQuery({
+    queryKey: ["stock-products"],
+    queryFn: () => listProducts({ size: 200 }),
+    enabled: canManage,
+  });
+
   const form = useForm<AdjustmentValues>({
     resolver: zodResolver(adjustmentSchema),
     defaultValues,
@@ -58,7 +65,11 @@ export function StockAdjustmentsPage() {
     return <EmptyBlock title="Access denied" description="Stock adjustment is available only for Owner and Warehouse roles." />;
   }
 
-  const products = getStockProducts();
+  const products = (productsQuery.data?.content ?? []).map((product) => ({
+    productId: product.id,
+    name: product.name,
+    sku: product.sku,
+  }));
 
   return (
     <div className="space-y-6">

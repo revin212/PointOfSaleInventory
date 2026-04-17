@@ -13,13 +13,13 @@ import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { useAuth } from "@/features/auth/auth-context";
+import { listProducts, listSuppliers } from "@/features/catalog/catalog-service";
 import { createPurchase, listPurchases, purchaseStatusOptions } from "@/features/purchases/purchases-service";
-import { MOCK_PRODUCTS } from "@/mocks/commerce";
 import { ROLE } from "@/types/enums";
 import type { PurchaseStatus } from "@/types/purchase";
 
 const createPurchaseSchema = z.object({
-  supplierName: z.string().min(2, "Supplier name is required"),
+  supplierId: z.string().min(1, "Supplier is required"),
   productId: z.string().min(1, "Product is required"),
   qtyOrdered: z.number().min(1, "Qty must be at least 1"),
   cost: z.number().min(0, "Cost must be positive"),
@@ -28,7 +28,7 @@ const createPurchaseSchema = z.object({
 type CreatePurchaseValues = z.infer<typeof createPurchaseSchema>;
 
 const defaultValues: CreatePurchaseValues = {
-  supplierName: "",
+  supplierId: "",
   productId: "",
   qtyOrdered: 1,
   cost: 0,
@@ -48,6 +48,18 @@ export function PurchasesPage() {
     enabled: canManage,
   });
 
+  const suppliersQuery = useQuery({
+    queryKey: ["suppliers-options"],
+    queryFn: listSuppliers,
+    enabled: canManage,
+  });
+
+  const productOptionsQuery = useQuery({
+    queryKey: ["product-options", "purchases"],
+    queryFn: () => listProducts({ size: 200 }),
+    enabled: canManage,
+  });
+
   const form = useForm<CreatePurchaseValues>({
     resolver: zodResolver(createPurchaseSchema),
     defaultValues,
@@ -56,7 +68,7 @@ export function PurchasesPage() {
   const createMutation = useMutation({
     mutationFn: (values: CreatePurchaseValues) =>
       createPurchase({
-        supplierName: values.supplierName,
+        supplierId: values.supplierId,
         items: [{ productId: values.productId, qtyOrdered: values.qtyOrdered, cost: values.cost }],
       }),
     onSuccess: async () => {
@@ -161,10 +173,17 @@ export function PurchasesPage() {
         <Card className="space-y-3">
           <h2 className="text-lg font-bold">Create purchase order</h2>
           <form className="space-y-2" onSubmit={form.handleSubmit((values) => createMutation.mutate(values))}>
-            <Input placeholder="Supplier name" {...form.register("supplierName")} />
+            <select className="h-10 rounded-xl border border-outline-variant/30 bg-surface-container-low px-3 text-sm" {...form.register("supplierId")}>
+              <option value="">Select supplier</option>
+              {suppliersQuery.data?.map((supplier) => (
+                <option key={supplier.id} value={supplier.id}>
+                  {supplier.name}
+                </option>
+              ))}
+            </select>
             <select className="h-10 rounded-xl border border-outline-variant/30 bg-surface-container-low px-3 text-sm" {...form.register("productId")}>
               <option value="">Select product</option>
-              {MOCK_PRODUCTS.map((product) => (
+              {productOptionsQuery.data?.content.map((product) => (
                 <option key={product.id} value={product.id}>
                   {product.name} ({product.sku})
                 </option>

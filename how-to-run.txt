@@ -1,0 +1,9 @@
+How to run
+Backend is running on port 8080 (Spring Boot, Postgres via backend/docker-compose.yml), 
+frontend on port 5173 (Vite). Seeded users for sign-in:
+
+owner@smartpos.local / Password123!
+cashier@smartpos.local / Password123!
+warehouse@smartpos.local / Password123!
+Set VITE_USE_MOCKS=true in smart-pos-frontend/.env.development to flip back to the mock dispatcher 
+without touching any component code.

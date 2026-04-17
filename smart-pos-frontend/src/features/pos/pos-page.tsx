@@ -1,16 +1,17 @@
 import { useMemo, useState } from "react";
-import { useMutation } from "@tanstack/react-query";
+import { useMutation, useQuery } from "@tanstack/react-query";
 import { Plus, Trash2 } from "lucide-react";
 
 import { FilterToolbar } from "@/components/shared/filter-toolbar";
 import { PageHeader } from "@/components/shared/page-header";
-import { EmptyBlock, ErrorBlock, SuccessBlock } from "@/components/shared/state-blocks";
+import { EmptyBlock, ErrorBlock, LoadingBlock, SuccessBlock } from "@/components/shared/state-blocks";
 import { StockBadge } from "@/components/shared/status-badge";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
+import { listProducts, type ProductRow } from "@/features/catalog/catalog-service";
+import { createSale } from "@/features/sales/sales-service";
 import { formatIDR } from "@/lib/format";
-import { MOCK_PRODUCTS, type PosProduct } from "@/mocks/commerce";
 import { PAYMENT_METHOD, type PaymentMethod } from "@/types/enums";
 
 type CartLine = {
@@ -35,11 +36,12 @@ export function PosPage() {
   const [paymentMethod, setPaymentMethod] = useState<PaymentMethod>(PAYMENT_METHOD.CASH);
   const [paidAmount, setPaidAmount] = useState(0);
 
-  const filteredProducts = useMemo(() => {
-    if (!query) return MOCK_PRODUCTS;
-    const q = query.toLowerCase();
-    return MOCK_PRODUCTS.filter((product) => product.name.toLowerCase().includes(q) || product.sku.toLowerCase().includes(q));
-  }, [query]);
+  const productsQuery = useQuery({
+    queryKey: ["pos-products", query],
+    queryFn: () => listProducts({ query, page: 0, size: 50 }),
+  });
+
+  const products = useMemo<ProductRow[]>(() => productsQuery.data?.content ?? [], [productsQuery.data]);
 
   const subtotal = useMemo(() => cart.reduce((sum, item) => sum + item.unitPrice * item.qty, 0), [cart]);
   const lineDiscountTotal = useMemo(() => cart.reduce((sum, item) => sum + item.lineDiscount, 0), [cart]);
@@ -54,14 +56,26 @@ export function PosPage() {
       if (paidAmount < total) {
         throw new Error("Paid amount is lower than total.");
       }
-      await new Promise((resolve) => {
-        setTimeout(resolve, 550);
+      return createSale({
+        items: cart.map((line) => ({
+          productId: line.productId,
+          qty: line.qty,
+          unitPrice: line.unitPrice,
+          lineDiscount: line.lineDiscount,
+        })),
+        discount,
+        paymentMethod,
+        paidAmount,
       });
-      return { invoiceNo: `INV-NEW-${Date.now()}`, paymentMethod };
+    },
+    onSuccess: () => {
+      setCart([]);
+      setDiscount(0);
+      setPaidAmount(0);
     },
   });
 
-  const addToCart = (product: PosProduct) => {
+  const addToCart = (product: ProductRow) => {
     setCart((prev) => {
       const existing = prev.find((item) => item.productId === product.id);
       if (existing) {
@@ -90,18 +104,27 @@ export function PosPage() {
       {checkoutMutation.isSuccess ? (
         <SuccessBlock
           title="Sale completed"
-          description={`Invoice ${checkoutMutation.data.invoiceNo} paid via ${checkoutMutation.data.paymentMethod}.`}
+          description={`Invoice ${checkoutMutation.data.invoiceNo} paid via ${paymentMethod}.`}
         />
       ) : null}
 
       <div className="grid gap-6 xl:grid-cols-[1.2fr_0.8fr]">
         <Card className="space-y-4">
           <h2 className="text-lg font-bold">Product list</h2>
-          {!filteredProducts.length ? (
+          {productsQuery.isLoading ? <LoadingBlock title="Loading products" description="Fetching product catalog..." /> : null}
+          {productsQuery.isError ? (
+            <ErrorBlock
+              title="Failed to load products"
+              description={(productsQuery.error as Error).message}
+              onRetry={() => productsQuery.refetch()}
+            />
+          ) : null}
+          {productsQuery.isSuccess && products.length === 0 ? (
             <EmptyBlock title="No products found" description="Try a different keyword or SKU." />
-          ) : (
+          ) : null}
+          {productsQuery.isSuccess && products.length > 0 ? (
             <div className="space-y-2">
-              {filteredProducts.map((product) => (
+              {products.map((product) => (
                 <div key={product.id} className="flex items-center justify-between rounded-xl bg-surface-container-low p-3">
                   <div>
                     <p className="font-semibold">{product.name}</p>
@@ -118,7 +141,7 @@ export function PosPage() {
                 </div>
               ))}
             </div>
-          )}
+          ) : null}
         </Card>
 
         <Card className="space-y-4">
@@ -217,7 +240,7 @@ export function PosPage() {
           <p className="text-sm text-on-surface-variant">Change: <span className="font-semibold tabular-nums-idr">{formatIDR(change)}</span></p>
 
           {checkoutMutation.isError ? (
-            <ErrorBlock title="Checkout failed" description={checkoutMutation.error.message} onRetry={() => checkoutMutation.reset()} retryLabel="Reset" />
+            <ErrorBlock title="Checkout failed" description={(checkoutMutation.error as Error).message} onRetry={() => checkoutMutation.reset()} retryLabel="Reset" />
           ) : null}
 
           <Button className="w-full" onClick={() => checkoutMutation.mutate()} disabled={checkoutMutation.isPending}>
