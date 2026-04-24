@@ -7,6 +7,7 @@ import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { useAuth } from "@/features/auth/auth-context";
 import { getDailyReport, getTopProductsReport } from "@/features/reports/reports-service";
+import { downloadExcel } from "@/lib/excel";
 import { formatIDR } from "@/lib/format";
 import { ROLE } from "@/types/enums";
 
@@ -38,7 +39,51 @@ export function ReportsPage() {
 
   return (
     <div className="space-y-6">
-      <PageHeader title="Reports" subtitle="Daily summary and top products based on selected date range." />
+      <PageHeader
+        title="Reports"
+        subtitle="Daily summary and top products based on selected date range."
+        actions={
+          <Button
+            variant="secondary"
+            disabled={!dailyQuery.data && !topProductsQuery.data}
+            onClick={() => {
+              const daily = dailyQuery.data;
+              const top = topProductsQuery.data;
+              const rowsDaily = daily
+                ? [
+                    { metric: "Gross", value: daily.gross },
+                    { metric: "Discount", value: daily.discount },
+                    { metric: "Net", value: daily.net },
+                    { metric: "Transactions", value: daily.transactionCount },
+                    ...daily.paymentBreakdown.map((p) => ({
+                      metric: `Payment ${p.paymentMethod}`,
+                      value: p.total,
+                    })),
+                  ]
+                : [];
+
+              const rowsTop = top
+                ? top.items.map((item) => ({
+                    sku: item.sku,
+                    name: item.name,
+                    qtySold: item.qtySold,
+                    revenue: item.revenue,
+                  }))
+                : [];
+
+              downloadExcel({
+                filename: `reports_${date}_${from}-${to}.xlsx`,
+                sheets: [
+                  { name: "DailySummary", rows: rowsDaily },
+                  { name: "TopProducts", rows: rowsTop },
+                ],
+              });
+            }}
+          >
+            Download Excel
+          </Button>
+        }
+      />
 
       <div className="grid gap-6 lg:grid-cols-2">
         <Card className="space-y-3">

@@ -105,11 +105,15 @@ function mapDetail(raw: BackendSaleDetail): SaleRecord {
 export async function getSales(params: {
   query?: string;
   paymentMethod?: PaymentMethod | "ALL";
+  from?: string;
+  to?: string;
   page?: number;
   size?: number;
 }): Promise<{ content: SaleRecord[]; page: number; size: number; totalElements: number; totalPages: number }> {
   const response = await api.get<PageResponse<BackendSaleSummary>>("/sales", {
     query: {
+      from: params.from,
+      to: params.to,
       paymentMethod: params.paymentMethod && params.paymentMethod !== "ALL" ? params.paymentMethod : undefined,
       page: params.page,
       size: params.size,

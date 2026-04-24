@@ -3,6 +3,7 @@ import { useMutation, useQuery } from "@tanstack/react-query";
 import { Plus, Trash2 } from "lucide-react";
 
 import { FilterToolbar } from "@/components/shared/filter-toolbar";
+import { CurrencyInput } from "@/components/shared/currency-input";
 import { PageHeader } from "@/components/shared/page-header";
 import { EmptyBlock, ErrorBlock, LoadingBlock, SuccessBlock } from "@/components/shared/state-blocks";
 import { StockBadge } from "@/components/shared/status-badge";
@@ -233,8 +234,20 @@ export function PosPage() {
           </div>
 
           <div className="grid grid-cols-2 gap-2">
-            <Input type="number" value={discount} onChange={(event) => setDiscount(Math.max(0, Number(event.target.value || 0)))} placeholder="Order discount" />
-            <Input type="number" value={paidAmount} onChange={(event) => setPaidAmount(Math.max(0, Number(event.target.value || 0)))} placeholder="Paid amount" />
+            <CurrencyInput
+              type="number"
+              value={discount}
+              onChange={(event) => setDiscount(Math.max(0, Number(event.target.value || 0)))}
+              placeholder="Order discount"
+              min={0}
+            />
+            <CurrencyInput
+              type="number"
+              value={paidAmount}
+              onChange={(event) => setPaidAmount(Math.max(0, Number(event.target.value || 0)))}
+              placeholder="Paid amount"
+              min={0}
+            />
           </div>
 
           <p className="text-sm text-on-surface-variant">Change: <span className="font-semibold tabular-nums-idr">{formatIDR(change)}</span></p>

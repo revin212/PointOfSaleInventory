@@ -7,7 +7,6 @@ import { ProductsPage } from "@/features/catalog/products-page";
 import { SuppliersPage } from "@/features/catalog/suppliers-page";
 import { DashboardPage } from "@/features/dashboard/dashboard-page";
 import { InventoryPage } from "@/features/inventory/inventory-page";
-import { StockAdjustmentsPage } from "@/features/inventory/stock-adjustments-page";
 import { PosPage } from "@/features/pos/pos-page";
 import { PurchaseReceivePage } from "@/features/purchases/purchase-receive-page";
 import { PurchasesPage } from "@/features/purchases/purchases-page";
@@ -41,7 +40,6 @@ export const appRouter = createBrowserRouter([
               { path: "/purchases", element: <PurchasesPage /> },
               { path: "/purchases/:id/receive", element: <PurchaseReceivePage /> },
               { path: "/inventory", element: <InventoryPage /> },
-              { path: "/stock-adjustments", element: <StockAdjustmentsPage /> },
             ],
           },
           {

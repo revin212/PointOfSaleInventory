@@ -173,25 +173,43 @@ export function PurchasesPage() {
         <Card className="space-y-3">
           <h2 className="text-lg font-bold">Create purchase order</h2>
           <form className="space-y-2" onSubmit={form.handleSubmit((values) => createMutation.mutate(values))}>
-            <select className="h-10 rounded-xl border border-outline-variant/30 bg-surface-container-low px-3 text-sm" {...form.register("supplierId")}>
-              <option value="">Select supplier</option>
-              {suppliersQuery.data?.map((supplier) => (
-                <option key={supplier.id} value={supplier.id}>
-                  {supplier.name}
-                </option>
-              ))}
-            </select>
-            <select className="h-10 rounded-xl border border-outline-variant/30 bg-surface-container-low px-3 text-sm" {...form.register("productId")}>
-              <option value="">Select product</option>
-              {productOptionsQuery.data?.content.map((product) => (
-                <option key={product.id} value={product.id}>
-                  {product.name} ({product.sku})
-                </option>
-              ))}
-            </select>
+            <div className="space-y-1">
+              <label className="text-xs font-bold uppercase tracking-widest text-on-surface-variant">Supplier</label>
+              <select className="h-10 w-full rounded-xl border border-outline-variant/30 bg-surface-container-low px-3 text-sm" {...form.register("supplierId")}>
+                <option value="">Select supplier</option>
+                {suppliersQuery.data?.map((supplier) => (
+                  <option key={supplier.id} value={supplier.id}>
+                    {supplier.name}
+                  </option>
+                ))}
+              </select>
+              <p className="text-xs text-on-surface-variant">Vendor you’re buying from.</p>
+            </div>
+
+            <div className="space-y-1">
+              <label className="text-xs font-bold uppercase tracking-widest text-on-surface-variant">Product</label>
+              <select className="h-10 w-full rounded-xl border border-outline-variant/30 bg-surface-container-low px-3 text-sm" {...form.register("productId")}>
+                <option value="">Select product</option>
+                {productOptionsQuery.data?.content.map((product) => (
+                  <option key={product.id} value={product.id}>
+                    {product.name} ({product.sku})
+                  </option>
+                ))}
+              </select>
+              <p className="text-xs text-on-surface-variant">Item to be ordered in this purchase order.</p>
+            </div>
+
             <div className="grid grid-cols-2 gap-2">
-              <Input type="number" placeholder="Qty ordered" {...form.register("qtyOrdered", { valueAsNumber: true })} />
-              <Input type="number" placeholder="Cost" {...form.register("cost", { valueAsNumber: true })} />
+              <div className="space-y-1">
+                <label className="text-xs font-bold uppercase tracking-widest text-on-surface-variant">Qty ordered</label>
+                <Input type="number" min={1} placeholder="e.g. 10" {...form.register("qtyOrdered", { valueAsNumber: true })} />
+                <p className="text-xs text-on-surface-variant">How many units you plan to receive.</p>
+              </div>
+              <div className="space-y-1">
+                <label className="text-xs font-bold uppercase tracking-widest text-on-surface-variant">Unit cost (IDR)</label>
+                <Input type="number" min={0} placeholder="e.g. 65000" {...form.register("cost", { valueAsNumber: true })} />
+                <p className="text-xs text-on-surface-variant">Purchase cost per unit (used for valuation).</p>
+              </div>
             </div>
             <Button type="submit" disabled={createMutation.isPending}>
               {createMutation.isPending ? "Saving..." : "Create Purchase"}

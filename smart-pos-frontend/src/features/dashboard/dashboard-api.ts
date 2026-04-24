@@ -5,13 +5,16 @@ import { getDailyReport, getTopProductsReport } from "@/features/reports/reports
 import { ROLE, type Role } from "@/types/enums";
 
 function todayIsoDate(): string {
-  return new Date().toISOString().slice(0, 10);
+  const now = new Date();
+  const offsetMs = now.getTimezoneOffset() * 60_000;
+  return new Date(now.getTime() - offsetMs).toISOString().slice(0, 10);
 }
 
 function daysAgoIsoDate(days: number): string {
   const d = new Date();
   d.setDate(d.getDate() - days);
-  return d.toISOString().slice(0, 10);
+  const offsetMs = d.getTimezoneOffset() * 60_000;
+  return new Date(d.getTime() - offsetMs).toISOString().slice(0, 10);
 }
 
 export async function getDashboardData(role: Role): Promise<DashboardData> {
@@ -19,27 +22,32 @@ export async function getDashboardData(role: Role): Promise<DashboardData> {
   const weekAgo = daysAgoIsoDate(6);
 
   const [dailyResult, topProductsResult, lowStockResult, recentSalesResult] = await Promise.allSettled([
-    role === ROLE.WAREHOUSE
+    role === ROLE.OWNER
       ? Promise.resolve(null)
       : getDailyReport(today),
-    role === ROLE.WAREHOUSE
+    role === ROLE.OWNER
       ? Promise.resolve(null)
       : getTopProductsReport(weekAgo, today),
     listOnHand({ lowOnly: true, page: 0, size: 10 }),
     role === ROLE.WAREHOUSE
       ? Promise.resolve(null)
-      : getSales({ page: 0, size: 5 }),
+      : getSales({ from: today, to: today, page: 0, size: 5 }),
   ]);
 
   const daily = dailyResult.status === "fulfilled" ? dailyResult.value : null;
   const topProducts = topProductsResult.status === "fulfilled" ? topProductsResult.value : null;
   const lowStock = lowStockResult.status === "fulfilled" ? lowStockResult.value : null;
   const recentSales = recentSalesResult.status === "fulfilled" ? recentSalesResult.value : null;
+  const cashierTodaySales =
+    role === ROLE.CASHIER
+      ? (recentSales?.content ?? []).reduce((sum, sale) => sum + (sale.totals.total ?? 0), 0)
+      : 0;
+  const cashierTxCount = role === ROLE.CASHIER ? Number(recentSales?.totalElements ?? 0) : 0;
 
   return {
     kpis: {
-      todaySales: daily?.net ?? 0,
-      transactionCount: daily?.transactionCount ?? 0,
+      todaySales: role === ROLE.OWNER ? (daily?.net ?? 0) : cashierTodaySales,
+      transactionCount: role === ROLE.OWNER ? (daily?.transactionCount ?? 0) : cashierTxCount,
       lowStockCount: lowStock?.totalElements ?? 0,
     },
     recentSales:

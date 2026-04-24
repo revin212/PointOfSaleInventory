@@ -250,8 +250,19 @@ export function ProductsPage() {
           <h2 className="text-lg font-bold">{editingProduct ? "Edit Product" : "Create Product"}</h2>
           {canManage ? (
             <form className="space-y-2" onSubmit={form.handleSubmit(onSubmit)}>
-              <Input placeholder="SKU" {...form.register("sku")} />
-              <Input placeholder="Name" {...form.register("name")} />
+              <div className="space-y-1">
+                <label className="text-xs font-bold uppercase tracking-widest text-on-surface-variant">SKU</label>
+                <Input placeholder="e.g. SKU-1001" {...form.register("sku")} />
+                <p className="text-xs text-on-surface-variant">Unique code used for search and receipts.</p>
+              </div>
+
+              <div className="space-y-1">
+                <label className="text-xs font-bold uppercase tracking-widest text-on-surface-variant">Product name</label>
+                <Input placeholder="e.g. Arabica Gayo 250g" {...form.register("name")} />
+              </div>
+
+              <div className="space-y-1">
+                <label className="text-xs font-bold uppercase tracking-widest text-on-surface-variant">Category</label>
               <select className="h-10 rounded-xl border border-outline-variant/30 bg-surface-container-low px-3 text-sm" {...form.register("categoryId")}>
                 <option value="">Select category</option>
                 {categoriesQuery.data?.map((category) => (
@@ -260,17 +271,42 @@ export function ProductsPage() {
                   </option>
                 ))}
               </select>
+              <p className="text-xs text-on-surface-variant">Used for filtering and inventory grouping.</p>
+              </div>
+
               <div className="grid grid-cols-2 gap-2">
-                <Input placeholder="Unit" {...form.register("unit")} />
-                <Input type="number" placeholder="Stock" {...form.register("stock", { valueAsNumber: true })} />
+                <div className="space-y-1">
+                  <label className="text-xs font-bold uppercase tracking-widest text-on-surface-variant">Unit</label>
+                  <Input placeholder="e.g. pcs / pack / box" {...form.register("unit")} />
+                </div>
+                <div className="space-y-1">
+                  <label className="text-xs font-bold uppercase tracking-widest text-on-surface-variant">Initial stock</label>
+                  <Input type="number" min={0} placeholder="0" {...form.register("stock", { valueAsNumber: true })} />
+                  <p className="text-xs text-on-surface-variant">Starting on-hand quantity when creating the product.</p>
+                </div>
               </div>
               <div className="grid grid-cols-2 gap-2">
-                <Input type="number" placeholder="Cost" {...form.register("cost", { valueAsNumber: true })} />
-                <Input type="number" placeholder="Price" {...form.register("price", { valueAsNumber: true })} />
+                <div className="space-y-1">
+                  <label className="text-xs font-bold uppercase tracking-widest text-on-surface-variant">Cost (IDR)</label>
+                  <Input type="number" min={0} placeholder="e.g. 65000" {...form.register("cost", { valueAsNumber: true })} />
+                  <p className="text-xs text-on-surface-variant">Your purchase cost per unit.</p>
+                </div>
+                <div className="space-y-1">
+                  <label className="text-xs font-bold uppercase tracking-widest text-on-surface-variant">Selling price (IDR)</label>
+                  <Input type="number" min={0} placeholder="e.g. 95000" {...form.register("price", { valueAsNumber: true })} />
+                  <p className="text-xs text-on-surface-variant">Shown in POS and product list.</p>
+                </div>
               </div>
               <div className="grid grid-cols-2 gap-2">
-                <Input placeholder="Barcode" {...form.register("barcode")} />
-                <Input type="number" placeholder="Low stock threshold" {...form.register("lowStockThreshold", { valueAsNumber: true })} />
+                <div className="space-y-1">
+                  <label className="text-xs font-bold uppercase tracking-widest text-on-surface-variant">Barcode (optional)</label>
+                  <Input placeholder="Scan code, if available" {...form.register("barcode")} />
+                </div>
+                <div className="space-y-1">
+                  <label className="text-xs font-bold uppercase tracking-widest text-on-surface-variant">Low stock threshold</label>
+                  <Input type="number" min={0} placeholder="e.g. 10" {...form.register("lowStockThreshold", { valueAsNumber: true })} />
+                  <p className="text-xs text-on-surface-variant">Mark as low stock when on-hand ≤ threshold.</p>
+                </div>
               </div>
               <label className="flex items-center gap-2 text-sm text-on-surface-variant">
                 <input type="checkbox" {...form.register("active")} />
