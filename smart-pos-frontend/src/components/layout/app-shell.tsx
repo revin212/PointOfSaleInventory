@@ -114,7 +114,7 @@ export function AppShell() {
             >
               <Menu className="h-5 w-5" />
             </button>
-            <div className="flex items-center gap-2">
+            <div className="ml-auto flex items-center gap-2">
               <div className="rounded-xl border border-outline-variant/20 bg-surface-container-low px-3 py-2 text-sm shadow-sm">
                 <p className="font-semibold text-on-surface">{user?.name ?? "Guest"}</p>
                 <p className="text-xs text-on-surface-variant">{user?.role ?? "N/A"}</p>
