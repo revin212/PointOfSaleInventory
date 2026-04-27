@@ -14,10 +14,20 @@ import { USE_MOCKS } from "@/lib/env";
 import { ApiError } from "@/lib/api-error";
 import { ROLE, type Role } from "@/types/enums";
 
-const loginSchema = z.object({
+const baseLoginSchema = z.object({
   email: z.string().email("Please enter a valid email address."),
   password: z.string().min(6, "Password must be at least 6 characters."),
-  role: z.enum([ROLE.OWNER, ROLE.CASHIER, ROLE.WAREHOUSE]),
+  role: z.enum([ROLE.OWNER, ROLE.CASHIER, ROLE.WAREHOUSE]).optional(),
+});
+
+const loginSchema = baseLoginSchema.superRefine((values, ctx) => {
+  if (USE_MOCKS && !values.role) {
+    ctx.addIssue({
+      code: z.ZodIssueCode.custom,
+      path: ["role"],
+      message: "Role is required in mock mode.",
+    });
+  }
 });
 
 type LoginFormValues = z.infer<typeof loginSchema>;
@@ -40,8 +50,8 @@ export function LoginPage() {
   } = useForm<LoginFormValues>({
     resolver: zodResolver(loginSchema),
     defaultValues: USE_MOCKS
-      ? { email: "owner@store.com", password: "password123", role: ROLE.OWNER }
-      : { email: "owner@smartpos.local", password: "Password123!", role: ROLE.OWNER },
+      ? ({ email: "owner@store.com", password: "password123", role: ROLE.OWNER } as LoginFormValues)
+      : ({ email: "owner@smartpos.local", password: "Password123!" } as LoginFormValues),
   });
 
   const roleOptions = useMemo(
@@ -57,11 +67,12 @@ export function LoginPage() {
     setErrorMessage(null);
     try {
       if (USE_MOCKS) {
+        const role = values.role as Role;
         if (!values.email.endsWith("@store.com") || values.password !== "password123") {
           setErrorMessage("Use an @store.com email and password123 for mock mode.");
           return;
         }
-        const user = await login(values.email, values.password, values.role);
+        const user = await login(values.email, values.password, role);
         navigate(roleLanding[user.role], { replace: true });
         return;
       }
@@ -79,7 +90,7 @@ export function LoginPage() {
   };
 
   return (
-    <div className="relative flex min-h-screen items-center justify-center bg-surface p-6">
+    <div className="relative flex min-h-screen items-center justify-center bg-surface p-4 sm:p-6">
       <div className="absolute inset-0 -z-10 overflow-hidden">
         <div className="absolute -left-16 -top-16 h-56 w-56 rounded-full bg-primary/10 blur-3xl" />
         <div className="absolute -bottom-20 -right-16 h-72 w-72 rounded-full bg-surface-container-highest/60 blur-3xl" />
@@ -114,22 +125,25 @@ export function LoginPage() {
                 {errors.password ? <p className="text-xs text-error">{errors.password.message}</p> : null}
               </div>
               <div className="space-y-1.5">
-                <label className="text-xs font-bold uppercase tracking-widest text-on-surface-variant" htmlFor="role">
-                  Role {USE_MOCKS ? "" : "(ignored — role comes from backend)"}
-                </label>
-                <select
-                  id="role"
-                  className="h-10 w-full rounded-xl border border-outline-variant/30 bg-surface-container-low px-3 text-sm focus:outline-none focus:ring-2 focus:ring-primary"
-                  {...register("role")}
-                  disabled={!USE_MOCKS}
-                >
-                  {roleOptions.map((role) => (
-                    <option key={role.value} value={role.value}>
-                      {role.label}
-                    </option>
-                  ))}
-                </select>
-                {errors.role ? <p className="text-xs text-error">{errors.role.message}</p> : null}
+                {USE_MOCKS ? (
+                  <>
+                    <label className="text-xs font-bold uppercase tracking-widest text-on-surface-variant" htmlFor="role">
+                      Role
+                    </label>
+                    <select
+                      id="role"
+                      className="h-10 w-full rounded-xl border border-outline-variant/30 bg-surface-container-low px-3 text-sm focus:outline-none focus:ring-2 focus:ring-primary"
+                      {...register("role")}
+                    >
+                      {roleOptions.map((role) => (
+                        <option key={role.value} value={role.value}>
+                          {role.label}
+                        </option>
+                      ))}
+                    </select>
+                    {errors.role ? <p className="text-xs text-error">{errors.role.message}</p> : null}
+                  </>
+                ) : null}
               </div>
               <Button type="submit" className="w-full" disabled={isSubmitting}>
                 {isSubmitting ? "Signing in..." : "Sign In"}
