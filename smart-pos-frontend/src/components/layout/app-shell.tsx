@@ -1,4 +1,4 @@
-import { LogOut, Menu, Search, X } from "lucide-react";
+import { LogOut, Menu, X } from "lucide-react";
 import { useEffect, useState } from "react";
 import { NavLink, Outlet, useNavigate } from "react-router-dom";
 
@@ -114,14 +114,6 @@ export function AppShell() {
             >
               <Menu className="h-5 w-5" />
             </button>
-            <div className="hidden w-full max-w-md items-center gap-2 rounded-xl border border-outline-variant/20 bg-surface-container-low px-3 py-2 shadow-sm lg:flex">
-              <Search className="h-4 w-4 text-on-surface-variant" />
-              <input
-                className="w-full bg-transparent text-sm text-on-surface outline-none placeholder:text-on-surface-variant"
-                placeholder="Search products, sales, inventory"
-                type="search"
-              />
-            </div>
             <div className="flex items-center gap-2">
               <div className="rounded-xl border border-outline-variant/20 bg-surface-container-low px-3 py-2 text-sm shadow-sm">
                 <p className="font-semibold text-on-surface">{user?.name ?? "Guest"}</p>
