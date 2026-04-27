@@ -14,7 +14,7 @@ import { Card } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { useAuth } from "@/features/auth/auth-context";
 import { listProducts } from "@/features/catalog/catalog-service";
-import { createStockAdjustment, listOnHand } from "@/features/inventory/inventory-service";
+import { createStockAdjustment, listMovements, listOnHand, type MovementType } from "@/features/inventory/inventory-service";
 import { ROLE } from "@/types/enums";
 
 const adjustmentSchema = z.object({
@@ -40,6 +40,9 @@ export function InventoryPage() {
   const [lowOnly, setLowOnly] = useState(false);
   const [page, setPage] = useState(0);
   const [isAdjustModalOpen, setIsAdjustModalOpen] = useState(false);
+  const [historyOpen, setHistoryOpen] = useState(false);
+  const [historyProductFilter, setHistoryProductFilter] = useState("ALL");
+  const [historyMovementType, setHistoryMovementType] = useState<MovementType | "ALL">("ALL");
 
   const stockQuery = useQuery({
     queryKey: ["stock-on-hand", query, lowOnly, page],
@@ -53,11 +56,33 @@ export function InventoryPage() {
     enabled: canManage,
   });
 
+  const movementsQuery = useQuery({
+    queryKey: ["stock-movements", historyProductFilter, historyMovementType],
+    queryFn: () =>
+      listMovements({
+        productId: historyProductFilter,
+        type: historyMovementType === "ALL" ? undefined : historyMovementType,
+        page: 0,
+        size: 20,
+      }),
+    enabled: canManage && historyOpen,
+  });
+
   const productOptions = useMemo(
     () =>
       (productsQuery.data?.content ?? []).map((p) => ({
         id: p.id,
         label: `${p.name} (${p.sku})`,
+      })),
+    [productsQuery.data?.content],
+  );
+
+  const historyProducts = useMemo(
+    () =>
+      (productsQuery.data?.content ?? []).map((p) => ({
+        id: p.id,
+        name: p.name,
+        sku: p.sku,
       })),
     [productsQuery.data?.content],
   );
@@ -82,14 +107,19 @@ export function InventoryPage() {
   }
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-4 md:space-y-6">
       <PageHeader
         title="Inventory On-Hand"
         subtitle="Track stock levels and quickly identify low-stock items."
         actions={
-          <Button variant="secondary" onClick={() => setIsAdjustModalOpen(true)}>
-            Stock adjustment
-          </Button>
+          <div className="flex flex-wrap items-center gap-2">
+            <Button variant="secondary" type="button" onClick={() => setHistoryOpen(true)}>
+              View History
+            </Button>
+            <Button variant="secondary" type="button" onClick={() => setIsAdjustModalOpen(true)}>
+              Stock adjustment
+            </Button>
+          </div>
         }
       />
       <FilterToolbar
@@ -162,6 +192,97 @@ export function InventoryPage() {
           </div>
         </Card>
       ) : null}
+
+      <Modal open={historyOpen} title="Inventory History" onClose={() => setHistoryOpen(false)}>
+        <div className="space-y-4">
+          <div className="rounded-xl border border-outline-variant/20 bg-surface-container-low/40 p-3">
+            <FilterToolbar
+              filters={
+                <div className="flex flex-wrap items-center gap-2">
+                  <select
+                    className="h-10 rounded-xl border border-outline-variant/30 bg-surface-container-low px-3 text-sm"
+                    value={historyProductFilter}
+                    onChange={(event) => setHistoryProductFilter(event.target.value)}
+                  >
+                    <option value="ALL">All products</option>
+                    {historyProducts.map((product) => (
+                      <option key={product.id} value={product.id}>
+                        {product.name} ({product.sku})
+                      </option>
+                    ))}
+                  </select>
+                  <select
+                    className="h-10 rounded-xl border border-outline-variant/30 bg-surface-container-low px-3 text-sm"
+                    value={historyMovementType}
+                    onChange={(event) => setHistoryMovementType(event.target.value as MovementType | "ALL")}
+                    aria-label="Movement type"
+                  >
+                    <option value="ADJUSTMENT">Adjustments only</option>
+                    <option value="ALL">All movement types</option>
+                    <option value="PURCHASE_RECEIVE">Purchase receive</option>
+                    <option value="SALE">Sale</option>
+                    <option value="SALE_CANCEL">Sale cancel</option>
+                  </select>
+                </div>
+              }
+            />
+          </div>
+
+          <div className="rounded-xl border border-outline-variant/20 bg-surface-container-lowest">
+            <div className="flex items-center justify-between gap-3 border-b border-outline-variant/15 px-4 py-3">
+              <div>
+                <p className="text-sm font-bold text-on-surface">History results</p>
+                <p className="text-xs text-on-surface-variant">Latest movements shown first.</p>
+              </div>
+              <Button type="button" variant="ghost" onClick={() => movementsQuery.refetch()} disabled={movementsQuery.isLoading}>
+                Refresh
+              </Button>
+            </div>
+
+            <div className="max-h-[60vh] overflow-auto p-3">
+              {movementsQuery.isLoading ? <LoadingBlock title="Loading movements" description="Fetching stock movement rows..." /> : null}
+              {movementsQuery.isError ? (
+                <ErrorBlock
+                  title="Failed to load movements"
+                  description={(movementsQuery.error as Error).message}
+                  onRetry={() => movementsQuery.refetch()}
+                />
+              ) : null}
+              {movementsQuery.isSuccess && movementsQuery.data.content.length === 0 ? (
+                <EmptyBlock title="No movements found" description="Try another product filter or movement type." />
+              ) : null}
+              {movementsQuery.isSuccess && movementsQuery.data.content.length > 0 ? (
+                <div className="space-y-2">
+                  {movementsQuery.data.content.map((movement) => (
+                    <div key={movement.id} className="rounded-xl border border-outline-variant/15 bg-surface-container-low p-3">
+                      <div className="flex items-center justify-between gap-3">
+                        <div className="min-w-0">
+                          <p className="truncate font-semibold">{movement.productName}</p>
+                          <p className="truncate text-xs text-on-surface-variant">
+                            {movement.type} • {movement.reason}
+                          </p>
+                        </div>
+                        <div className="shrink-0 text-right">
+                          <p className={`text-sm font-bold ${movement.qtyDelta < 0 ? "text-error" : "text-primary"}`}>
+                            {movement.qtyDelta > 0 ? `+${movement.qtyDelta}` : movement.qtyDelta}
+                          </p>
+                          <p className="text-xs text-on-surface-variant">{new Date(movement.createdAt).toLocaleString("id-ID")}</p>
+                        </div>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              ) : null}
+            </div>
+          </div>
+
+          <div className="flex items-center justify-end gap-2 pt-2">
+            <Button variant="secondary" type="button" onClick={() => setHistoryOpen(false)}>
+              Close
+            </Button>
+          </div>
+        </div>
+      </Modal>
 
       <Modal
         open={isAdjustModalOpen}

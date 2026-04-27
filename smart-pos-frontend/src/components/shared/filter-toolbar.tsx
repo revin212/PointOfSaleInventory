@@ -23,7 +23,7 @@ export function FilterToolbar({
   className,
 }: FilterToolbarProps) {
   return (
-    <div className={cn("rounded-xl bg-surface-container-low p-4", className)}>
+    <div className={cn("rounded-xl bg-surface-container-low p-3 sm:p-4", className)}>
       <div className="flex flex-col gap-3 lg:flex-row lg:items-center">
         <div className="relative w-full lg:max-w-sm">
           <Search className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-on-surface-variant" />

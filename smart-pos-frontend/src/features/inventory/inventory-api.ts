@@ -78,12 +78,18 @@ export async function listOnHand(params: {
 
 export async function listMovements(params: {
   productId?: string;
+  type?: MovementType;
+  from?: string;
+  to?: string;
   page?: number;
   size?: number;
 }): Promise<{ content: StockMovement[]; page: number; size: number; totalElements: number; totalPages: number }> {
   const response = await api.get<PageResponse<BackendMovement>>("/stock/movements", {
     query: {
       productId: params.productId && params.productId !== "ALL" ? params.productId : undefined,
+      type: params.type,
+      from: params.from,
+      to: params.to,
       page: params.page,
       size: params.size,
     },

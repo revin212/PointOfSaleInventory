@@ -79,13 +79,16 @@ export async function listOnHand(params: { query?: string; lowOnly?: boolean; pa
   };
 }
 
-export async function listMovements(params: { productId?: string; page?: number; size?: number }) {
+export async function listMovements(params: { productId?: string; type?: MovementType; page?: number; size?: number }) {
   await sleep(300);
   const page = params.page ?? 0;
   const size = params.size ?? 10;
   let filtered = stockMovements;
   if (params.productId && params.productId !== "ALL") {
     filtered = filtered.filter((entry) => entry.productId === params.productId);
+  }
+  if (params.type) {
+    filtered = filtered.filter((entry) => entry.type === params.type);
   }
   const start = page * size;
   const content = filtered.slice(start, start + size);

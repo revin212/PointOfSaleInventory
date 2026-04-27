@@ -3,6 +3,8 @@ export type DashboardData = {
     todaySales: number;
     transactionCount: number;
     lowStockCount: number;
+    outOfStockCount: number;
+    skuCount: number;
   };
   recentSales: Array<{
     id: string;
@@ -10,6 +12,15 @@ export type DashboardData = {
     cashierName: string;
     paymentMethod: string;
     total: number;
+    createdAt: string;
+  }>;
+  recentMovements: Array<{
+    id: string;
+    productId: string;
+    productName: string;
+    type: string;
+    qtyDelta: number;
+    reason: string;
     createdAt: string;
   }>;
   topProducts: Array<{

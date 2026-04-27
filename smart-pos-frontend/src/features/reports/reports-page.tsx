@@ -38,7 +38,7 @@ export function ReportsPage() {
   }
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-4 md:space-y-6">
       <PageHeader
         title="Reports"
         subtitle="Daily summary and top products based on selected date range."
@@ -85,7 +85,7 @@ export function ReportsPage() {
         }
       />
 
-      <div className="grid gap-6 lg:grid-cols-2">
+      <div className="grid gap-4 md:gap-6 lg:grid-cols-2">
         <Card className="space-y-3">
           <h2 className="text-lg font-bold">Daily Summary</h2>
           <div className="flex items-end gap-2">

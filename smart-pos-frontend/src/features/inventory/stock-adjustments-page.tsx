@@ -5,6 +5,7 @@ import { useForm } from "react-hook-form";
 import { z } from "zod";
 
 import { FilterToolbar } from "@/components/shared/filter-toolbar";
+import { Modal } from "@/components/shared/modal";
 import { PageHeader } from "@/components/shared/page-header";
 import { EmptyBlock, ErrorBlock, LoadingBlock, SuccessBlock } from "@/components/shared/state-blocks";
 import { Button } from "@/components/ui/button";
@@ -12,7 +13,7 @@ import { Card } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { useAuth } from "@/features/auth/auth-context";
 import { listProducts } from "@/features/catalog/catalog-service";
-import { createStockAdjustment, listMovements } from "@/features/inventory/inventory-service";
+import { createStockAdjustment, listMovements, type MovementType } from "@/features/inventory/inventory-service";
 import { ROLE } from "@/types/enums";
 
 const adjustmentSchema = z.object({
@@ -34,10 +35,18 @@ export function StockAdjustmentsPage() {
   const canManage = user?.role === ROLE.OWNER || user?.role === ROLE.WAREHOUSE;
   const queryClient = useQueryClient();
   const [productFilter, setProductFilter] = useState("ALL");
+  const [movementType, setMovementType] = useState<MovementType | "ALL">("ADJUSTMENT");
+  const [historyOpen, setHistoryOpen] = useState(false);
 
   const movementsQuery = useQuery({
-    queryKey: ["stock-movements", productFilter],
-    queryFn: () => listMovements({ productId: productFilter, page: 0, size: 20 }),
+    queryKey: ["stock-movements", productFilter, movementType],
+    queryFn: () =>
+      listMovements({
+        productId: productFilter,
+        type: movementType === "ALL" ? undefined : movementType,
+        page: 0,
+        size: 20,
+      }),
     enabled: canManage,
   });
 
@@ -72,56 +81,55 @@ export function StockAdjustmentsPage() {
   }));
 
   return (
-    <div className="space-y-6">
-      <PageHeader title="Stock Adjustments" subtitle="Create stock delta adjustments with mandatory reason." />
+    <div className="space-y-4 md:space-y-6">
+      <PageHeader
+        title="Stock Adjustments"
+        subtitle="Create stock delta adjustments with mandatory reason."
+        actions={
+          <Button variant="secondary" type="button" onClick={() => setHistoryOpen(true)}>
+            View History
+          </Button>
+        }
+      />
 
       {adjustmentMutation.isSuccess ? <SuccessBlock title="Adjustment saved" description="Stock movement has been recorded." /> : null}
       {adjustmentMutation.isError ? (
         <ErrorBlock title="Adjustment failed" description={(adjustmentMutation.error as Error).message || "Try again."} onRetry={() => adjustmentMutation.reset()} retryLabel="Reset" />
       ) : null}
 
-      <div className="grid gap-6 lg:grid-cols-[0.95fr_1.05fr]">
-        <Card className="space-y-3">
-          <h2 className="text-lg font-bold">Create adjustment</h2>
-          <form className="space-y-2" onSubmit={form.handleSubmit((values) => adjustmentMutation.mutate(values))}>
-            <select className="h-10 rounded-xl border border-outline-variant/30 bg-surface-container-low px-3 text-sm" {...form.register("productId")}>
-              <option value="">Select product</option>
-              {products.map((product) => (
-                <option key={product.productId} value={product.productId}>
-                  {product.name} ({product.sku})
-                </option>
-              ))}
-            </select>
-            <Input
-              type="number"
-              placeholder="Qty delta (negative or positive)"
-              {...form.register("qtyDelta", { valueAsNumber: true })}
-            />
-            <Input placeholder="Reason" {...form.register("reason")} />
-            <Button type="submit" disabled={adjustmentMutation.isPending}>
-              {adjustmentMutation.isPending ? "Saving..." : "Submit Adjustment"}
-            </Button>
-          </form>
-        </Card>
-
-        <Card className="space-y-3">
+      <Modal open={historyOpen} title="Stock Adjustment History" onClose={() => setHistoryOpen(false)}>
+        <div className="space-y-3">
           <FilterToolbar
             filters={
-              <select
-                className="h-10 rounded-xl border border-outline-variant/30 bg-surface-container-low px-3 text-sm"
-                value={productFilter}
-                onChange={(event) => setProductFilter(event.target.value)}
-              >
-                <option value="ALL">All products</option>
-                {products.map((product) => (
-                  <option key={product.productId} value={product.productId}>
-                    {product.name}
-                  </option>
-                ))}
-              </select>
+              <div className="flex flex-wrap items-center gap-2">
+                <select
+                  className="h-10 rounded-xl border border-outline-variant/30 bg-surface-container-low px-3 text-sm"
+                  value={productFilter}
+                  onChange={(event) => setProductFilter(event.target.value)}
+                >
+                  <option value="ALL">All products</option>
+                  {products.map((product) => (
+                    <option key={product.productId} value={product.productId}>
+                      {product.name}
+                    </option>
+                  ))}
+                </select>
+                <select
+                  className="h-10 rounded-xl border border-outline-variant/30 bg-surface-container-low px-3 text-sm"
+                  value={movementType}
+                  onChange={(event) => setMovementType(event.target.value as MovementType | "ALL")}
+                  aria-label="Movement type"
+                >
+                  <option value="ADJUSTMENT">Adjustments only</option>
+                  <option value="ALL">All movement types</option>
+                  <option value="PURCHASE_RECEIVE">Purchase receive</option>
+                  <option value="SALE">Sale</option>
+                  <option value="SALE_CANCEL">Sale cancel</option>
+                </select>
+              </div>
             }
           />
-          <h2 className="text-lg font-bold">Stock movement history</h2>
+
           {movementsQuery.isLoading ? <LoadingBlock title="Loading movements" description="Fetching stock movement rows..." /> : null}
           {movementsQuery.isError ? (
             <ErrorBlock title="Failed to load movements" description={(movementsQuery.error as Error).message} onRetry={() => movementsQuery.refetch()} />
@@ -151,6 +159,57 @@ export function StockAdjustmentsPage() {
               ))}
             </div>
           ) : null}
+
+          <div className="flex items-center justify-end gap-2 pt-2">
+            <Button variant="secondary" type="button" onClick={() => setHistoryOpen(false)}>
+              Close
+            </Button>
+          </div>
+        </div>
+      </Modal>
+
+      <div className="grid gap-4 md:gap-6 lg:grid-cols-[0.95fr_1.05fr]">
+        <Card className="space-y-3">
+          <h2 className="text-lg font-bold">Create adjustment</h2>
+          <form className="space-y-2" onSubmit={form.handleSubmit((values) => adjustmentMutation.mutate(values))}>
+            <select className="h-10 rounded-xl border border-outline-variant/30 bg-surface-container-low px-3 text-sm" {...form.register("productId")}>
+              <option value="">Select product</option>
+              {products.map((product) => (
+                <option key={product.productId} value={product.productId}>
+                  {product.name} ({product.sku})
+                </option>
+              ))}
+            </select>
+            <Input
+              type="number"
+              placeholder="Qty delta (negative or positive)"
+              {...form.register("qtyDelta", { valueAsNumber: true })}
+            />
+            <Input placeholder="Reason" {...form.register("reason")} />
+            <Button type="submit" disabled={adjustmentMutation.isPending}>
+              {adjustmentMutation.isPending ? "Saving..." : "Submit Adjustment"}
+            </Button>
+          </form>
+        </Card>
+
+        <Card className="space-y-3">
+          <h2 className="text-lg font-bold">History</h2>
+          <p className="text-sm text-on-surface-variant">
+            View adjustment and movement history with filters in a focused popup.
+          </p>
+          <div className="flex flex-wrap items-center gap-2">
+            <Button type="button" variant="secondary" onClick={() => setHistoryOpen(true)}>
+              View History
+            </Button>
+            <Button
+              type="button"
+              variant="ghost"
+              onClick={() => movementsQuery.refetch()}
+              disabled={!movementsQuery.isSuccess && !movementsQuery.isError}
+            >
+              Refresh
+            </Button>
+          </div>
         </Card>
       </div>
     </div>

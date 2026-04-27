@@ -28,6 +28,10 @@
     text-rendering: optimizeLegibility;
     font-feature-settings: "tnum" 1;
   }
+
+  ::selection {
+    background: hsl(var(--primary) / 0.18);
+  }
 }
 
 @layer utilities {
@@ -43,5 +47,9 @@
   .glass-panel {
     background: hsl(var(--surface-container-lowest) / 0.8);
     backdrop-filter: blur(12px);
+  }
+
+  .app-container {
+    @apply mx-auto w-full max-w-7xl;
   }
 }

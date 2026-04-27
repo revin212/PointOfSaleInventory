@@ -16,18 +16,23 @@ export function Modal({ open, title, children, onClose }: ModalProps) {
   if (!open) return null;
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-on-surface/20 p-4">
-      <Card className="glass-panel w-full max-w-lg space-y-4 shadow-ambient">
-        <div className="flex items-start justify-between gap-3">
-          <div className="space-y-1">
-            <h3 className="text-lg font-bold text-on-surface">{title}</h3>
+    <div className="fixed inset-0 z-50 overflow-y-auto bg-on-surface/25 p-4 backdrop-blur-sm">
+      <div className="flex min-h-full items-start justify-center py-6">
+        <Card className="glass-panel flex w-full max-w-2xl flex-col shadow-popover">
+          <div className="flex items-start justify-between gap-3 border-b border-outline-variant/20 pb-3">
+            <div className="space-y-1">
+              <h3 className="text-lg font-bold text-on-surface">{title}</h3>
+            </div>
+            <Button type="button" variant="ghost" size="icon" onClick={onClose} aria-label="Close modal">
+              <X className="h-4 w-4" />
+            </Button>
           </div>
-          <Button type="button" variant="secondary" size="icon" onClick={onClose} aria-label="Close modal">
-            <X className="h-4 w-4" />
-          </Button>
-        </div>
-        {children}
-      </Card>
+
+          <div className="min-h-0 flex-1 overflow-auto pt-4 pr-1">
+            {children}
+          </div>
+        </Card>
+      </div>
     </div>
   );
 }

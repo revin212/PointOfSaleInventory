@@ -1,7 +1,8 @@
 import { useMemo } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useForm, useWatch } from "react-hook-form";
-import { useParams } from "react-router-dom";
+import { useNavigate, useParams } from "react-router-dom";
+import { ArrowLeft } from "lucide-react";
 
 import { PageHeader } from "@/components/shared/page-header";
 import { ErrorBlock, LoadingBlock, SuccessBlock } from "@/components/shared/state-blocks";
@@ -18,6 +19,7 @@ type ReceiveFormValues = {
 
 export function PurchaseReceivePage() {
   const { id } = useParams<{ id: string }>();
+  const navigate = useNavigate();
   const { user } = useAuth();
   const canReceive = user?.role === ROLE.OWNER || user?.role === ROLE.WAREHOUSE;
   const queryClient = useQueryClient();
@@ -83,10 +85,23 @@ export function PurchaseReceivePage() {
   }
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-4 md:space-y-6">
       <PageHeader
         title={`Receive ${purchaseQuery.data.purchaseNo}`}
         subtitle={`${purchaseQuery.data.supplierName} • Status ${purchaseQuery.data.status}`}
+        actions={
+          <Button
+            type="button"
+            variant="secondary"
+            onClick={() => {
+              if (window.history.length > 1) navigate(-1);
+              else navigate("/purchases");
+            }}
+          >
+            <ArrowLeft className="h-4 w-4" />
+            Back
+          </Button>
+        }
       />
 
       {receiveMutation.isSuccess ? <SuccessBlock title="Receive completed" description="Purchase status has been updated." /> : null}
@@ -115,15 +130,21 @@ export function PurchaseReceivePage() {
                 <p className="text-xs text-on-surface-variant">
                   Ordered {line.qtyOrdered} • Received {line.qtyReceived} • Remaining {remaining}
                 </p>
-                <div className="mt-2 grid grid-cols-2 gap-2">
-                  <Input
-                    type="number"
-                    min={0}
-                    max={remaining}
-                    placeholder="Qty to receive"
-                    {...form.register(`lines.${index}.qtyToReceive`, { valueAsNumber: true })}
-                  />
-                  <Input type="number" min={0} placeholder="Cost" {...form.register(`lines.${index}.cost`, { valueAsNumber: true })} />
+                <div className="mt-3 grid gap-2 sm:grid-cols-2">
+                  <div className="space-y-1">
+                    <label className="text-xs font-bold uppercase tracking-widest text-on-surface-variant">Qty to receive</label>
+                    <Input
+                      type="number"
+                      min={0}
+                      max={remaining}
+                      placeholder="0"
+                      {...form.register(`lines.${index}.qtyToReceive`, { valueAsNumber: true })}
+                    />
+                  </div>
+                  <div className="space-y-1">
+                    <label className="text-xs font-bold uppercase tracking-widest text-on-surface-variant">Unit cost (IDR)</label>
+                    <Input type="number" min={0} placeholder="0" {...form.register(`lines.${index}.cost`, { valueAsNumber: true })} />
+                  </div>
                 </div>
               </div>
             );

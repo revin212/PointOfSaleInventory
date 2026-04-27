@@ -27,14 +27,22 @@ export function StatusBadge({ tone, label }: StatusBadgeProps) {
 
 type StockBadgeProps = {
   stockTone: StockTone;
+  stock?: number;
+  unit?: string;
 };
 
-export function StockBadge({ stockTone }: StockBadgeProps) {
+export function StockBadge({ stockTone, stock, unit }: StockBadgeProps) {
   const config = stockMap[stockTone];
   return (
-    <Badge variant={config.variant} className="inline-flex items-center gap-1.5">
+    <Badge variant={config.variant} className="inline-flex items-center gap-1.5 whitespace-nowrap">
       <span className="h-1.5 w-1.5 rounded-full bg-current" />
-      {config.text}
+      <span>{config.text}</span>
+      {typeof stock === "number" ? (
+        <span className="text-xs opacity-80">
+          • {stock}
+          {unit ? ` ${unit}` : ""}
+        </span>
+      ) : null}
     </Badge>
   );
 }

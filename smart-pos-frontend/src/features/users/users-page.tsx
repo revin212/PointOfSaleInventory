@@ -82,7 +82,7 @@ export function UsersPage() {
   }
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-4 md:space-y-6">
       <PageHeader title="Users & Roles" subtitle="Owner-only user management and role assignment." />
 
       {createMutation.isSuccess || updateMutation.isSuccess || activeMutation.isSuccess ? (
@@ -95,7 +95,7 @@ export function UsersPage() {
         />
       ) : null}
 
-      <div className="grid gap-6 lg:grid-cols-[1.1fr_0.9fr]">
+      <div className="grid gap-4 md:gap-6 lg:grid-cols-[1.1fr_0.9fr]">
         <Card className="space-y-3">
           <h2 className="text-lg font-bold">User list</h2>
           {usersQuery.isLoading ? <LoadingBlock title="Loading users" description="Fetching user list..." /> : null}
@@ -110,12 +110,12 @@ export function UsersPage() {
               {usersQuery.data.map((row) => (
                 <div key={row.id} className="rounded-xl bg-surface-container-low p-3">
                   <div className="flex items-start justify-between gap-3">
-                    <div>
-                      <p className="font-semibold">{row.name}</p>
-                      <p className="text-xs text-on-surface-variant">{row.email}</p>
+                    <div className="min-w-0">
+                      <p className="truncate font-semibold">{row.name}</p>
+                      <p className="truncate text-xs text-on-surface-variant">{row.email}</p>
                       <p className="text-xs font-semibold">{row.role}</p>
                     </div>
-                    <div className="flex gap-2">
+                    <div className="flex shrink-0 flex-col gap-2 sm:flex-row sm:flex-wrap sm:justify-end">
                       <Button
                         variant="secondary"
                         size="sm"
@@ -163,7 +163,7 @@ export function UsersPage() {
               <input type="checkbox" {...form.register("active")} />
               Active
             </label>
-            <div className="flex gap-2">
+            <div className="flex flex-wrap gap-2">
               <Button type="submit" disabled={createMutation.isPending || updateMutation.isPending}>
                 {editing ? "Update User" : "Create User"}
               </Button>

@@ -25,6 +25,8 @@ export default {
       },
       boxShadow: {
         ambient: "0 20px 40px -10px rgba(11, 28, 48, 0.06)",
+        card: "0 1px 0 rgba(11, 28, 48, 0.04), 0 12px 30px -16px rgba(11, 28, 48, 0.16)",
+        popover: "0 18px 40px -20px rgba(11, 28, 48, 0.35)",
       },
     },
   },

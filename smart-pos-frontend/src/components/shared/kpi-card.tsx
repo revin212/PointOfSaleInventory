@@ -18,7 +18,7 @@ export function KpiCard({ label, value, trend, icon: Icon }: KpiCardProps) {
         {Icon ? <Icon className="h-4 w-4 text-primary" /> : null}
       </CardHeader>
       <CardContent className="space-y-1">
-        <CardTitle className="text-2xl tabular-nums-idr">{value}</CardTitle>
+        <CardTitle className="text-xl tabular-nums-idr sm:text-2xl">{value}</CardTitle>
         {trend ? (
           <p className="inline-flex items-center gap-1 text-xs font-semibold text-primary">
             <ArrowUpRight className="h-3.5 w-3.5" />
