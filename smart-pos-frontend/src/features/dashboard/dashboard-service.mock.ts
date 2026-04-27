@@ -8,6 +8,8 @@ const ownerData: DashboardData = {
     todaySales: 12500000,
     transactionCount: 45,
     lowStockCount: 3,
+    outOfStockCount: 1,
+    skuCount: 128,
   },
   recentSales: [
     {
@@ -40,6 +42,26 @@ const ownerData: DashboardData = {
     { productId: "p-5", name: "Cold Brew Bottle", sku: "SKU-1005", qtySold: 33, revenue: 2574000 },
     { productId: "p-4", name: "Paper Filter V60", sku: "SKU-1004", qtySold: 28, revenue: 1260000 },
   ],
+  recentMovements: [
+    {
+      id: "m-201",
+      productId: "p-1",
+      productName: "Arabica Gayo 250g",
+      type: "ADJUSTMENT",
+      qtyDelta: 10,
+      reason: "Initial stock",
+      createdAt: "2026-04-16T07:10:00.000Z",
+    },
+    {
+      id: "m-202",
+      productId: "p-4",
+      productName: "Paper Filter V60",
+      type: "SALE",
+      qtyDelta: -3,
+      reason: "Sold",
+      createdAt: "2026-04-16T09:52:00.000Z",
+    },
+  ],
   lowStockItems: [
     { productId: "p-3", name: "Manual Brew Kettle", sku: "SKU-1003", stock: 6, threshold: 10 },
     { productId: "p-2", name: "Robusta Blend 500g", sku: "SKU-1002", stock: 8, threshold: 10 },
@@ -53,6 +75,8 @@ const cashierData: DashboardData = {
     todaySales: 8400000,
     transactionCount: 31,
     lowStockCount: 0,
+    outOfStockCount: 0,
+    skuCount: ownerData.kpis.skuCount,
   },
   lowStockItems: [],
 };
@@ -63,6 +87,8 @@ const warehouseData: DashboardData = {
     todaySales: 0,
     transactionCount: 0,
     lowStockCount: ownerData.lowStockItems.length,
+    outOfStockCount: ownerData.kpis.outOfStockCount,
+    skuCount: ownerData.kpis.skuCount,
   },
   recentSales: [],
 };
