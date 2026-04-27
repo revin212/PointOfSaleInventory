@@ -10,10 +10,13 @@ import jakarta.validation.constraints.Size;
 
 import java.math.BigDecimal;
 import java.util.List;
+import java.util.UUID;
 
 public record CreateSaleRequest(
         @NotEmpty @Size(max = 100) @Valid List<SaleItemRequest> items,
         @DecimalMin("0.00") @Digits(integer = 16, fraction = 2) BigDecimal discount,
         @NotNull PaymentMethod paymentMethod,
-        @NotNull @DecimalMin("0.00") @Digits(integer = 16, fraction = 2) BigDecimal paidAmount
+        @NotNull @DecimalMin("0.00") @Digits(integer = 16, fraction = 2) BigDecimal paidAmount,
+        UUID customerId,
+        UUID paymentTypeId
 ) {}

@@ -8,6 +8,7 @@ import { SuppliersPage } from "@/features/catalog/suppliers-page";
 import { DashboardPage } from "@/features/dashboard/dashboard-page";
 import { InventoryPage } from "@/features/inventory/inventory-page";
 import { PosPage } from "@/features/pos/pos-page";
+import { PaymentTypesPage } from "@/features/payment-types/payment-types-page";
 import { PurchaseReceivePage } from "@/features/purchases/purchase-receive-page";
 import { PurchasesPage } from "@/features/purchases/purchases-page";
 import { ReportsPage } from "@/features/reports/reports-page";
@@ -44,7 +45,10 @@ export const appRouter = createBrowserRouter([
           },
           {
             element: <ProtectedRoute allowedRoles={[ROLE.OWNER]} />,
-            children: [{ path: "/users", element: <UsersPage /> }],
+            children: [
+              { path: "/users", element: <UsersPage /> },
+              { path: "/payment-types", element: <PaymentTypesPage /> },
+            ],
           },
         ],
       },

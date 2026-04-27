@@ -30,6 +30,10 @@ type BackendSaleItem = {
 type BackendSaleTotals = {
   subtotal: number;
   discount: number;
+  netAmount?: number;
+  taxRate?: number;
+  taxAmount?: number;
+  adminFee?: number;
   total: number;
   paidAmount: number;
   changeAmount: number;
@@ -69,6 +73,10 @@ function mapSummary(raw: BackendSaleSummary): SaleRecord {
     totals: {
       subtotal: Number(raw.subtotal ?? 0),
       discount: Number(raw.discount ?? 0),
+      netAmount: undefined,
+      taxRate: undefined,
+      taxAmount: undefined,
+      adminFee: undefined,
       total: Number(raw.total ?? 0),
       paidAmount: 0,
       changeAmount: 0,
@@ -95,6 +103,10 @@ function mapDetail(raw: BackendSaleDetail): SaleRecord {
     totals: {
       subtotal: Number(raw.totals.subtotal ?? 0),
       discount: Number(raw.totals.discount ?? 0),
+      netAmount: raw.totals.netAmount != null ? Number(raw.totals.netAmount) : undefined,
+      taxRate: raw.totals.taxRate != null ? Number(raw.totals.taxRate) : undefined,
+      taxAmount: raw.totals.taxAmount != null ? Number(raw.totals.taxAmount) : undefined,
+      adminFee: raw.totals.adminFee != null ? Number(raw.totals.adminFee) : undefined,
       total: Number(raw.totals.total ?? 0),
       paidAmount: Number(raw.totals.paidAmount ?? 0),
       changeAmount: Number(raw.totals.changeAmount ?? 0),
@@ -154,6 +166,7 @@ export async function createSale(payload: {
   items: Array<{ productId: string; qty: number; unitPrice: number; lineDiscount?: number }>;
   discount: number;
   paymentMethod: PaymentMethod;
+  paymentTypeId?: string;
   paidAmount: number;
 }): Promise<BackendSaleCreateResponse> {
   return api.post<BackendSaleCreateResponse>("/sales", {
@@ -166,6 +179,7 @@ export async function createSale(payload: {
     discount: payload.discount,
     paymentMethod: payload.paymentMethod,
     paidAmount: payload.paidAmount,
+    paymentTypeId: payload.paymentTypeId,
   });
 }
 

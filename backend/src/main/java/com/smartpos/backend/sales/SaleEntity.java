@@ -40,6 +40,12 @@ public class SaleEntity {
     @Column(name = "cashier_id", nullable = false)
     private UUID cashierId;
 
+    @Column(name = "customer_id")
+    private UUID customerId;
+
+    @Column(name = "shift_id")
+    private UUID shiftId;
+
     @Enumerated(EnumType.STRING)
     @Column(name = "status", nullable = false, length = 20)
     private SaleStatus status;
@@ -52,6 +58,21 @@ public class SaleEntity {
 
     @Column(name = "total", nullable = false, precision = 18, scale = 2)
     private BigDecimal total;
+
+    @Column(name = "net_amount", nullable = false, precision = 18, scale = 2)
+    private BigDecimal netAmount = BigDecimal.ZERO;
+
+    @Column(name = "tax_rate", nullable = false, precision = 8, scale = 6)
+    private BigDecimal taxRate = BigDecimal.ZERO;
+
+    @Column(name = "tax_amount", nullable = false, precision = 18, scale = 2)
+    private BigDecimal taxAmount = BigDecimal.ZERO;
+
+    @Column(name = "payment_type_id")
+    private UUID paymentTypeId;
+
+    @Column(name = "admin_fee", nullable = false, precision = 18, scale = 2)
+    private BigDecimal adminFee = BigDecimal.ZERO;
 
     @Enumerated(EnumType.STRING)
     @Column(name = "payment_method", nullable = false, length = 20)
@@ -89,6 +110,12 @@ public class SaleEntity {
     public UUID getCashierId() { return cashierId; }
     public void setCashierId(UUID cashierId) { this.cashierId = cashierId; }
 
+    public UUID getCustomerId() { return customerId; }
+    public void setCustomerId(UUID customerId) { this.customerId = customerId; }
+
+    public UUID getShiftId() { return shiftId; }
+    public void setShiftId(UUID shiftId) { this.shiftId = shiftId; }
+
     public SaleStatus getStatus() { return status; }
     public void setStatus(SaleStatus status) { this.status = status; }
 
@@ -100,6 +127,21 @@ public class SaleEntity {
 
     public BigDecimal getTotal() { return total; }
     public void setTotal(BigDecimal total) { this.total = total; }
+
+    public BigDecimal getNetAmount() { return netAmount; }
+    public void setNetAmount(BigDecimal netAmount) { this.netAmount = netAmount; }
+
+    public BigDecimal getTaxRate() { return taxRate; }
+    public void setTaxRate(BigDecimal taxRate) { this.taxRate = taxRate; }
+
+    public BigDecimal getTaxAmount() { return taxAmount; }
+    public void setTaxAmount(BigDecimal taxAmount) { this.taxAmount = taxAmount; }
+
+    public UUID getPaymentTypeId() { return paymentTypeId; }
+    public void setPaymentTypeId(UUID paymentTypeId) { this.paymentTypeId = paymentTypeId; }
+
+    public BigDecimal getAdminFee() { return adminFee; }
+    public void setAdminFee(BigDecimal adminFee) { this.adminFee = adminFee; }
 
     public PaymentMethod getPaymentMethod() { return paymentMethod; }
     public void setPaymentMethod(PaymentMethod paymentMethod) { this.paymentMethod = paymentMethod; }

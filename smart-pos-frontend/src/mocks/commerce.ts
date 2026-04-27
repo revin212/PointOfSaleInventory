@@ -30,6 +30,10 @@ export type SaleRecord = {
   totals: {
     subtotal: number;
     discount: number;
+    netAmount?: number;
+    taxRate?: number;
+    taxAmount?: number;
+    adminFee?: number;
     total: number;
     paidAmount: number;
     changeAmount: number;

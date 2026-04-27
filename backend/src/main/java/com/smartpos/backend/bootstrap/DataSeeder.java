@@ -18,6 +18,8 @@ import com.smartpos.backend.sales.SaleRepository;
 import com.smartpos.backend.stock.StockLedgerService;
 import com.smartpos.backend.suppliers.SupplierEntity;
 import com.smartpos.backend.suppliers.SupplierRepository;
+import com.smartpos.backend.paymenttypes.PaymentTypeEntity;
+import com.smartpos.backend.paymenttypes.PaymentTypeRepository;
 import com.smartpos.backend.users.UserEntity;
 import com.smartpos.backend.users.UserRepository;
 import org.slf4j.Logger;
@@ -48,6 +50,7 @@ public class DataSeeder implements ApplicationRunner {
     private final StockLedgerService stockLedger;
     private final SaleRepository saleRepository;
     private final AuditService auditService;
+    private final PaymentTypeRepository paymentTypeRepository;
 
     public DataSeeder(AppProperties props,
                       UserRepository userRepository,
@@ -57,7 +60,8 @@ public class DataSeeder implements ApplicationRunner {
                       ProductRepository productRepository,
                       StockLedgerService stockLedger,
                       SaleRepository saleRepository,
-                      AuditService auditService) {
+                      AuditService auditService,
+                      PaymentTypeRepository paymentTypeRepository) {
         this.props = props;
         this.userRepository = userRepository;
         this.passwordEncoder = passwordEncoder;
@@ -67,6 +71,7 @@ public class DataSeeder implements ApplicationRunner {
         this.stockLedger = stockLedger;
         this.saleRepository = saleRepository;
         this.auditService = auditService;
+        this.paymentTypeRepository = paymentTypeRepository;
     }
 
     @Override
@@ -81,6 +86,8 @@ public class DataSeeder implements ApplicationRunner {
         UUID cashierId = ensureUser("Cashier User", "cashier@smartpos.local", Role.CASHIER, password);
         ensureUser("Warehouse", "warehouse@smartpos.local", Role.WAREHOUSE, password);
 
+        ensurePaymentTypes();
+
         long productCount = productRepository.count();
         if (productCount < 5) {
             log.info("Seeding demo catalog + initial stock + sample sales (existing products: {})", productCount);
@@ -88,9 +95,34 @@ public class DataSeeder implements ApplicationRunner {
         }
     }
 
+    private void ensurePaymentTypes() {
+        ensurePaymentType(PaymentMethod.CASH, "Cash");
+        ensurePaymentType(PaymentMethod.TRANSFER, "Transfer");
+        ensurePaymentType(PaymentMethod.EWALLET, "E-Wallet");
+    }
+
+    private void ensurePaymentType(PaymentMethod method, String name) {
+        paymentTypeRepository.findByMethod(method).orElseGet(() -> {
+            PaymentTypeEntity pt = new PaymentTypeEntity();
+            pt.setMethod(method);
+            pt.setName(name);
+            pt.setAdminFee(BigDecimal.ZERO);
+            pt.setActive(true);
+            return paymentTypeRepository.save(pt);
+        });
+    }
+
     private UUID ensureUser(String name, String email, Role role, String password) {
         return userRepository.findByEmailIgnoreCase(email)
-                .map(UserEntity::getId)
+                .map(existing -> {
+                    if (props.seed().forceResetPasswords()) {
+                        log.warn("Resetting seeded user password for {}", email);
+                        existing.setPasswordHash(passwordEncoder.encode(password));
+                        existing.setActive(true);
+                        return userRepository.save(existing).getId();
+                    }
+                    return existing.getId();
+                })
                 .orElseGet(() -> {
                     log.info("Seeding user {}", email);
                     UserEntity u = new UserEntity();
@@ -124,15 +156,15 @@ public class DataSeeder implements ApplicationRunner {
         supplierB.setAddress("Bandung, Indonesia");
         supplierRepository.saveAll(List.of(supplierA, supplierB));
 
-        ProductEntity p1 = product("SKU-1001", "Arabica Gayo 250g", beans.getId(), "pack",
+        ProductEntity p1 = product("SKU-1001", "Arabica Gayo 250g", beans.getId(), supplierA.getId(), "pack",
                 bd(65000), bd(95000), "899000100001", 10, true);
-        ProductEntity p2 = product("SKU-1002", "Robusta Blend 500g", beans.getId(), "pack",
+        ProductEntity p2 = product("SKU-1002", "Robusta Blend 500g", beans.getId(), supplierA.getId(), "pack",
                 bd(80000), bd(120000), "899000100002", 8, true);
-        ProductEntity p3 = product("SKU-1003", "Manual Brew Kettle", tools.getId(), "pcs",
+        ProductEntity p3 = product("SKU-1003", "Manual Brew Kettle", tools.getId(), supplierB.getId(), "pcs",
                 bd(240000), bd(350000), "899000200003", 2, true);
-        ProductEntity p4 = product("SKU-1004", "Paper Filter V60", tools.getId(), "box",
+        ProductEntity p4 = product("SKU-1004", "Paper Filter V60", tools.getId(), supplierB.getId(), "box",
                 bd(25000), bd(45000), "899000200004", 15, true);
-        ProductEntity p5 = product("SKU-1005", "Cold Brew Bottle", tools.getId(), "pcs",
+        ProductEntity p5 = product("SKU-1005", "Cold Brew Bottle", tools.getId(), supplierB.getId(), "pcs",
                 bd(52000), bd(78000), "899000200005", 5, true);
         productRepository.saveAll(List.of(p1, p2, p3, p4, p5));
 
@@ -158,13 +190,14 @@ public class DataSeeder implements ApplicationRunner {
         ), bd(0), PaymentMethod.EWALLET);
     }
 
-    private ProductEntity product(String sku, String name, UUID categoryId, String unit,
+    private ProductEntity product(String sku, String name, UUID categoryId, UUID supplierId, String unit,
                                   BigDecimal cost, BigDecimal price, String barcode,
                                   int lowStockThreshold, boolean active) {
         ProductEntity p = new ProductEntity();
         p.setSku(sku);
         p.setName(name);
         p.setCategoryId(categoryId);
+        p.setSupplierId(supplierId);
         p.setUnit(unit);
         p.setCost(cost);
         p.setPrice(price);

@@ -10,7 +10,9 @@ import { StockBadge } from "@/components/shared/status-badge";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
+import { getAppConfig } from "@/features/app-config/app-config-api";
 import { listProducts, type ProductRow } from "@/features/catalog/catalog-service";
+import { listPaymentTypes } from "@/features/payment-types/payment-types-api";
 import { createSale } from "@/features/sales/sales-service";
 import { formatIDR } from "@/lib/format";
 import { PAYMENT_METHOD, type PaymentMethod } from "@/types/enums";
@@ -24,16 +26,15 @@ type CartLine = {
   lineDiscount: number;
 };
 
-const paymentOptions: Array<{ value: PaymentMethod; label: string }> = [
-  { value: PAYMENT_METHOD.CASH, label: "Cash" },
-  { value: PAYMENT_METHOD.TRANSFER, label: "Transfer" },
-  { value: PAYMENT_METHOD.EWALLET, label: "E-Wallet" },
-];
+function roundIdr(amount: number) {
+  return Math.round(amount);
+}
 
 export function PosPage() {
   const [query, setQuery] = useState("");
   const [cart, setCart] = useState<CartLine[]>([]);
   const [discount, setDiscount] = useState(0);
+  const [paymentTypeId, setPaymentTypeId] = useState<string>("");
   const [paymentMethod, setPaymentMethod] = useState<PaymentMethod>(PAYMENT_METHOD.CASH);
   const [paidAmount, setPaidAmount] = useState(0);
 
@@ -42,11 +43,30 @@ export function PosPage() {
     queryFn: () => listProducts({ query, page: 0, size: 50 }),
   });
 
+  const appConfigQuery = useQuery({
+    queryKey: ["app-config"],
+    queryFn: getAppConfig,
+  });
+
+  const paymentTypesQuery = useQuery({
+    queryKey: ["payment-types"],
+    queryFn: listPaymentTypes,
+  });
+
   const products = useMemo<ProductRow[]>(() => productsQuery.data?.content ?? [], [productsQuery.data]);
+  const paymentTypes = useMemo(() => paymentTypesQuery.data ?? [], [paymentTypesQuery.data]);
+  const selectedPaymentType = useMemo(
+    () => paymentTypes.find((pt) => pt.id === paymentTypeId) ?? null,
+    [paymentTypes, paymentTypeId],
+  );
 
   const subtotal = useMemo(() => cart.reduce((sum, item) => sum + item.unitPrice * item.qty, 0), [cart]);
   const lineDiscountTotal = useMemo(() => cart.reduce((sum, item) => sum + item.lineDiscount, 0), [cart]);
-  const total = Math.max(0, subtotal - lineDiscountTotal - discount);
+  const net = Math.max(0, subtotal - lineDiscountTotal - discount);
+  const vatRate = appConfigQuery.data?.taxEnabled ? Number(appConfigQuery.data.vatRate ?? 0) : 0;
+  const taxAmount = useMemo(() => (vatRate > 0 ? roundIdr(net * vatRate) : 0), [net, vatRate]);
+  const adminFee = selectedPaymentType ? Number(selectedPaymentType.adminFee ?? 0) : 0;
+  const total = Math.max(0, net + taxAmount + adminFee);
   const change = Math.max(0, paidAmount - total);
 
   const checkoutMutation = useMutation({
@@ -65,7 +85,8 @@ export function PosPage() {
           lineDiscount: line.lineDiscount,
         })),
         discount,
-        paymentMethod,
+        paymentMethod: selectedPaymentType?.method ?? paymentMethod,
+        paymentTypeId: selectedPaymentType?.id,
         paidAmount,
       });
     },
@@ -73,6 +94,7 @@ export function PosPage() {
       setCart([]);
       setDiscount(0);
       setPaidAmount(0);
+      setPaymentTypeId("");
     },
   });
 
@@ -97,7 +119,7 @@ export function PosPage() {
   };
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-4 md:space-y-6">
       <PageHeader title="POS" subtitle="Create sale with enum-safe payment methods and quick cart actions." />
 
       <FilterToolbar searchPlaceholder="Search by product or SKU" searchValue={query} onSearchChange={setQuery} />
@@ -105,11 +127,11 @@ export function PosPage() {
       {checkoutMutation.isSuccess ? (
         <SuccessBlock
           title="Sale completed"
-          description={`Invoice ${checkoutMutation.data.invoiceNo} paid via ${paymentMethod}.`}
+          description={`Invoice ${checkoutMutation.data.invoiceNo} paid via ${selectedPaymentType?.name ?? paymentMethod}.`}
         />
       ) : null}
 
-      <div className="grid gap-6 xl:grid-cols-[1.2fr_0.8fr]">
+      <div className="grid gap-4 md:gap-6 xl:grid-cols-[1.2fr_0.8fr]">
         <Card className="space-y-4">
           <h2 className="text-lg font-bold">Product list</h2>
           {productsQuery.isLoading ? <LoadingBlock title="Loading products" description="Fetching product catalog..." /> : null}
@@ -126,15 +148,21 @@ export function PosPage() {
           {productsQuery.isSuccess && products.length > 0 ? (
             <div className="space-y-2">
               {products.map((product) => (
-                <div key={product.id} className="flex items-center justify-between rounded-xl bg-surface-container-low p-3">
-                  <div>
+                <div key={product.id} className="flex items-start justify-between gap-3 rounded-xl bg-surface-container-low p-3">
+                  <div className="min-w-0">
                     <p className="font-semibold">{product.name}</p>
                     <p className="text-xs text-on-surface-variant">{product.sku}</p>
                     <p className="text-sm font-bold tabular-nums-idr">{formatIDR(product.price)}</p>
                   </div>
-                  <div className="flex items-center gap-3">
-                    <StockBadge stockTone={product.stock <= 0 ? "out" : product.stock <= 10 ? "low" : "in-stock"} />
-                    <Button size="sm" onClick={() => addToCart(product)}>
+                  <div className="flex shrink-0 flex-col items-end gap-2 sm:flex-row sm:items-center sm:gap-3">
+                    <StockBadge
+                      stockTone={
+                        product.stock <= 0 ? "out" : product.stock <= product.lowStockThreshold ? "low" : "in-stock"
+                      }
+                      stock={product.stock}
+                      unit={product.unit}
+                    />
+                    <Button size="sm" className="w-full sm:w-auto" onClick={() => addToCart(product)}>
                       <Plus className="h-4 w-4" />
                       Add
                     </Button>
@@ -166,34 +194,52 @@ export function PosPage() {
                       <Trash2 className="h-4 w-4" />
                     </button>
                   </div>
-                  <div className="mt-2 flex items-center gap-2">
-                    <Input
-                      type="number"
-                      min={1}
-                      value={line.qty}
-                      onChange={(event) =>
-                        setCart((prev) =>
-                          prev.map((item) =>
-                            item.productId === line.productId ? { ...item, qty: Math.max(1, Number(event.target.value || 1)) } : item,
-                          ),
-                        )
-                      }
-                    />
-                    <Input
-                      type="number"
-                      min={0}
-                      value={line.lineDiscount}
-                      onChange={(event) =>
-                        setCart((prev) =>
-                          prev.map((item) =>
-                            item.productId === line.productId
-                              ? { ...item, lineDiscount: Math.max(0, Number(event.target.value || 0)) }
-                              : item,
-                          ),
-                        )
-                      }
-                      placeholder="Line discount"
-                    />
+                  <div className="mt-3 grid grid-cols-2 gap-2">
+                    <div className="space-y-1">
+                      <label
+                        className="text-xs font-bold uppercase tracking-widest text-on-surface-variant"
+                        htmlFor={`qty-${line.productId}`}
+                      >
+                        Qty
+                      </label>
+                      <Input
+                        id={`qty-${line.productId}`}
+                        type="number"
+                        min={1}
+                        value={line.qty}
+                        onChange={(event) =>
+                          setCart((prev) =>
+                            prev.map((item) =>
+                              item.productId === line.productId ? { ...item, qty: Math.max(1, Number(event.target.value || 1)) } : item,
+                            ),
+                          )
+                        }
+                      />
+                    </div>
+                    <div className="space-y-1">
+                      <label
+                        className="text-xs font-bold uppercase tracking-widest text-on-surface-variant"
+                        htmlFor={`lineDiscount-${line.productId}`}
+                      >
+                        Line discount (Rp)
+                      </label>
+                      <CurrencyInput
+                        id={`lineDiscount-${line.productId}`}
+                        type="number"
+                        min={0}
+                        value={line.lineDiscount}
+                        onChange={(event) =>
+                          setCart((prev) =>
+                            prev.map((item) =>
+                              item.productId === line.productId
+                                ? { ...item, lineDiscount: Math.max(0, Number(event.target.value || 0)) }
+                                : item,
+                            ),
+                          )
+                        }
+                        placeholder="0"
+                      />
+                    </div>
                   </div>
                 </div>
               ))}
@@ -209,6 +255,14 @@ export function PosPage() {
               <span>Discount</span>
               <span className="tabular-nums-idr">-{formatIDR(lineDiscountTotal + discount)}</span>
             </div>
+            <div className="flex items-center justify-between text-sm">
+              <span>Tax{vatRate > 0 ? ` (${Math.round(vatRate * 100)}%)` : ""}</span>
+              <span className="tabular-nums-idr">{formatIDR(taxAmount)}</span>
+            </div>
+            <div className="flex items-center justify-between text-sm">
+              <span>Admin fee</span>
+              <span className="tabular-nums-idr">{formatIDR(adminFee)}</span>
+            </div>
             <div className="flex items-center justify-between text-base font-bold">
               <span>Total</span>
               <span className="tabular-nums-idr">{formatIDR(total)}</span>
@@ -216,38 +270,59 @@ export function PosPage() {
           </div>
 
           <div className="space-y-2">
-            <label className="text-xs font-bold uppercase tracking-widest text-on-surface-variant" htmlFor="paymentMethod">
-              Payment Method
+            <label className="text-xs font-bold uppercase tracking-widest text-on-surface-variant" htmlFor="paymentType">
+              Payment Type
             </label>
             <select
-              id="paymentMethod"
+              id="paymentType"
               className="h-10 w-full rounded-xl border border-outline-variant/30 bg-surface-container-low px-3 text-sm"
-              value={paymentMethod}
-              onChange={(event) => setPaymentMethod(event.target.value as PaymentMethod)}
+              value={paymentTypeId}
+              onChange={(event) => {
+                const next = event.target.value;
+                setPaymentTypeId(next);
+                const found = paymentTypes.find((pt) => pt.id === next);
+                if (found) setPaymentMethod(found.method);
+              }}
             >
-              {paymentOptions.map((option) => (
-                <option key={option.value} value={option.value}>
-                  {option.label}
+              <option value="">Select payment type</option>
+              {paymentTypes.map((pt) => (
+                <option key={pt.id} value={pt.id}>
+                  {pt.name} {pt.adminFee > 0 ? `• +${formatIDR(pt.adminFee)}` : ""}
                 </option>
               ))}
             </select>
+            {!paymentTypes.length ? (
+              <p className="text-xs text-on-surface-variant">No payment types loaded yet. Make sure backend is updated and seeded.</p>
+            ) : null}
           </div>
 
-          <div className="grid grid-cols-2 gap-2">
-            <CurrencyInput
-              type="number"
-              value={discount}
-              onChange={(event) => setDiscount(Math.max(0, Number(event.target.value || 0)))}
-              placeholder="Order discount"
-              min={0}
-            />
-            <CurrencyInput
-              type="number"
-              value={paidAmount}
-              onChange={(event) => setPaidAmount(Math.max(0, Number(event.target.value || 0)))}
-              placeholder="Paid amount"
-              min={0}
-            />
+          <div className="grid gap-2 sm:grid-cols-2">
+            <div className="space-y-1">
+              <label className="text-xs font-bold uppercase tracking-widest text-on-surface-variant" htmlFor="orderDiscount">
+                Order discount (Rp)
+              </label>
+              <CurrencyInput
+                id="orderDiscount"
+                type="number"
+                value={discount}
+                onChange={(event) => setDiscount(Math.max(0, Number(event.target.value || 0)))}
+                placeholder="0"
+                min={0}
+              />
+            </div>
+            <div className="space-y-1">
+              <label className="text-xs font-bold uppercase tracking-widest text-on-surface-variant" htmlFor="paidAmount">
+                Paid amount (Rp)
+              </label>
+              <CurrencyInput
+                id="paidAmount"
+                type="number"
+                value={paidAmount}
+                onChange={(event) => setPaidAmount(Math.max(0, Number(event.target.value || 0)))}
+                placeholder="0"
+                min={0}
+              />
+            </div>
           </div>
 
           <p className="text-sm text-on-surface-variant">Change: <span className="font-semibold tabular-nums-idr">{formatIDR(change)}</span></p>
