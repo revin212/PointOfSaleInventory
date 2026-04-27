@@ -17,6 +17,8 @@ export type Supplier = {
 export type ProductRow = PosProduct & {
   categoryId: string;
   categoryName: string;
+  supplierId?: string;
+  supplierName?: string;
   unit: string;
   cost: number;
   barcode?: string;

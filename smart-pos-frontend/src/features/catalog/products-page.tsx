@@ -13,7 +13,8 @@ import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { useAuth } from "@/features/auth/auth-context";
-import { createProduct, deleteProduct, listCategories, listProducts, updateProduct, type ProductRow } from "@/features/catalog/catalog-service";
+import { createProduct, deleteProduct, listCategories, listProducts, listSuppliers, updateProduct, type ProductRow } from "@/features/catalog/catalog-service";
+import { createStockAdjustment } from "@/features/inventory/inventory-service";
 import { formatIDR } from "@/lib/format";
 import { ROLE } from "@/types/enums";
 
@@ -21,6 +22,7 @@ const productFormSchema = z.object({
   sku: z.string().min(1, "SKU is required"),
   name: z.string().min(2, "Name is required"),
   categoryId: z.string().min(1, "Category is required"),
+  supplierId: z.string().min(1, "Supplier is required"),
   unit: z.string().min(1, "Unit is required"),
   cost: z.number().min(0),
   price: z.number().min(0),
@@ -36,6 +38,7 @@ const defaultValues: ProductFormValues = {
   sku: "",
   name: "",
   categoryId: "",
+  supplierId: "",
   unit: "pcs",
   cost: 0,
   price: 0,
@@ -61,6 +64,10 @@ export function ProductsPage() {
     queryKey: ["categories-options"],
     queryFn: listCategories,
   });
+  const suppliersQuery = useQuery({
+    queryKey: ["suppliers-options", "products"],
+    queryFn: listSuppliers,
+  });
 
   const productsQuery = useQuery({
     queryKey: ["products", query, categoryId, page],
@@ -71,32 +78,56 @@ export function ProductsPage() {
     resolver: zodResolver(productFormSchema),
     defaultValues,
   });
+  const {
+    formState: { errors },
+  } = form;
 
   const createMutation = useMutation({
-    mutationFn: (values: ProductFormValues) => {
+    mutationFn: async (values: ProductFormValues) => {
       const category = categoriesQuery.data?.find((item) => item.id === values.categoryId);
-      return createProduct({
+      const created = await createProduct({
         ...values,
         categoryName: category?.name ?? "Unknown",
       });
+      if (values.stock > 0) {
+        await createStockAdjustment({
+          productId: created.id,
+          qtyDelta: values.stock,
+          reason: "Initial stock (product create)",
+        });
+      }
+      return created;
     },
     onSuccess: async () => {
       await queryClient.invalidateQueries({ queryKey: ["products"] });
+      await queryClient.invalidateQueries({ queryKey: ["stock-on-hand"] });
+      await queryClient.invalidateQueries({ queryKey: ["stock-movements"] });
       form.reset(defaultValues);
     },
   });
 
   const updateMutation = useMutation({
-    mutationFn: (values: ProductFormValues) => {
+    mutationFn: async (values: ProductFormValues) => {
       if (!editingProduct) throw new Error("No product selected");
       const category = categoriesQuery.data?.find((item) => item.id === values.categoryId);
-      return updateProduct(editingProduct.id, {
+      const updated = await updateProduct(editingProduct.id, {
         ...values,
         categoryName: category?.name ?? "Unknown",
       });
+      const delta = values.stock - (editingProduct.stock ?? 0);
+      if (delta !== 0) {
+        await createStockAdjustment({
+          productId: editingProduct.id,
+          qtyDelta: delta,
+          reason: "Stock update (product edit)",
+        });
+      }
+      return updated;
     },
     onSuccess: async () => {
       await queryClient.invalidateQueries({ queryKey: ["products"] });
+      await queryClient.invalidateQueries({ queryKey: ["stock-on-hand"] });
+      await queryClient.invalidateQueries({ queryKey: ["stock-movements"] });
       setEditingProduct(null);
       form.reset(defaultValues);
     },
@@ -124,7 +155,7 @@ export function ProductsPage() {
   };
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-4 md:space-y-6">
       <PageHeader
         title="Products"
         subtitle={isReadOnly ? "Read-only mode for cashier role." : "Manage products with category mapping and stock visibility."}
@@ -166,7 +197,7 @@ export function ProductsPage() {
         />
       ) : null}
 
-      <div className="grid gap-6 xl:grid-cols-[1.05fr_0.95fr]">
+      <div className="grid gap-4 md:gap-6 xl:grid-cols-[1.05fr_0.95fr]">
         <Card className="space-y-3">
           <h2 className="text-lg font-bold">Products List</h2>
           {productsQuery.isLoading ? <LoadingBlock title="Loading products" description="Fetching product rows..." /> : null}
@@ -186,10 +217,17 @@ export function ProductsPage() {
                       <p className="text-xs text-on-surface-variant">
                         {product.sku} • {product.categoryName}
                       </p>
+                      <p className="text-xs text-on-surface-variant">
+                        Supplier: <span className="font-semibold text-on-surface">{product.supplierName ?? "—"}</span>
+                      </p>
                       <p className="text-sm font-semibold tabular-nums-idr">{formatIDR(product.price)}</p>
                     </div>
                     <div className="space-y-2 text-right">
-                      <StockBadge stockTone={product.stock <= 0 ? "out" : product.stock <= product.lowStockThreshold ? "low" : "in-stock"} />
+                      <StockBadge
+                        stockTone={product.stock <= 0 ? "out" : product.stock <= product.lowStockThreshold ? "low" : "in-stock"}
+                        stock={product.stock}
+                        unit={product.unit}
+                      />
                       {canManage ? (
                         <div className="flex justify-end gap-2">
                           <Button
@@ -201,6 +239,7 @@ export function ProductsPage() {
                                 sku: product.sku,
                                 name: product.name,
                                 categoryId: product.categoryId,
+                                supplierId: product.supplierId ?? "",
                                 unit: product.unit,
                                 cost: product.cost,
                                 price: product.price,
@@ -262,7 +301,7 @@ export function ProductsPage() {
               </div>
 
               <div className="space-y-1">
-                <label className="text-xs font-bold uppercase tracking-widest text-on-surface-variant">Category</label>
+              <label className="text-xs font-bold uppercase tracking-widest text-on-surface-variant block">Category</label>
               <select className="h-10 rounded-xl border border-outline-variant/30 bg-surface-container-low px-3 text-sm" {...form.register("categoryId")}>
                 <option value="">Select category</option>
                 {categoriesQuery.data?.map((category) => (
@@ -272,6 +311,20 @@ export function ProductsPage() {
                 ))}
               </select>
               <p className="text-xs text-on-surface-variant">Used for filtering and inventory grouping.</p>
+              </div>
+
+              <div className="space-y-1">
+                <label className="text-xs font-bold uppercase tracking-widest text-on-surface-variant block">Supplier</label>
+                <select className="h-10 rounded-xl border border-outline-variant/30 bg-surface-container-low px-3 text-sm" {...form.register("supplierId")}>
+                  <option value="">Select supplier</option>
+                  {suppliersQuery.data?.map((supplier) => (
+                    <option key={supplier.id} value={supplier.id}>
+                      {supplier.name}
+                    </option>
+                  ))}
+                </select>
+                <p className="text-xs text-on-surface-variant">Used to filter products when creating purchase orders.</p>
+                {errors.supplierId ? <p className="text-xs text-error">{errors.supplierId.message}</p> : null}
               </div>
 
               <div className="grid grid-cols-2 gap-2">

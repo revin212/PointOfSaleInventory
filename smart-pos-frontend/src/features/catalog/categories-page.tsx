@@ -76,7 +76,7 @@ export function CategoriesPage() {
   const deleteTarget = categoriesQuery.data?.find((item) => item.id === deletingId) ?? null;
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-4 md:space-y-6">
       <PageHeader title="Categories" subtitle={canManage ? "Manage category master data." : "No access for this role."} />
 
       {createMutation.isSuccess || updateMutation.isSuccess || deleteMutation.isSuccess ? (
@@ -89,7 +89,7 @@ export function CategoriesPage() {
         />
       ) : null}
 
-      <div className="grid gap-6 lg:grid-cols-[1.1fr_0.9fr]">
+      <div className="grid gap-4 md:gap-6 lg:grid-cols-[1.1fr_0.9fr]">
         <Card className="space-y-3">
           <h2 className="text-lg font-bold">Category list</h2>
           {categoriesQuery.isLoading ? <LoadingBlock title="Loading categories" description="Fetching category data..." /> : null}

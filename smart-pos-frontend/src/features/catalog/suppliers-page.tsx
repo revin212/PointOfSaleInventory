@@ -78,7 +78,7 @@ export function SuppliersPage() {
   const deleteTarget = suppliersQuery.data?.find((item) => item.id === deletingId) ?? null;
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-4 md:space-y-6">
       <PageHeader title="Suppliers" subtitle={canManage ? "Maintain supplier records and contacts." : "No access for this role."} />
 
       {createMutation.isSuccess || updateMutation.isSuccess || deleteMutation.isSuccess ? (
@@ -91,7 +91,7 @@ export function SuppliersPage() {
         />
       ) : null}
 
-      <div className="grid gap-6 lg:grid-cols-[1.1fr_0.9fr]">
+      <div className="grid gap-4 md:gap-6 lg:grid-cols-[1.1fr_0.9fr]">
         <Card className="space-y-3">
           <h2 className="text-lg font-bold">Supplier list</h2>
           {suppliersQuery.isLoading ? <LoadingBlock title="Loading suppliers" description="Fetching supplier data..." /> : null}
