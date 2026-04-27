@@ -1,7 +1,7 @@
-import { useState } from "react";
+import { useMemo, useState } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { useForm } from "react-hook-form";
+import { useForm, useWatch } from "react-hook-form";
 import { z } from "zod";
 import { Link } from "react-router-dom";
 
@@ -65,6 +65,13 @@ export function PurchasesPage() {
     defaultValues,
   });
 
+  const selectedSupplierId = useWatch({ control: form.control, name: "supplierId" });
+  const productOptions = useMemo(() => {
+    const products = productOptionsQuery.data?.content ?? [];
+    if (!selectedSupplierId) return [];
+    return products.filter((p) => String(p.supplierId ?? "") === selectedSupplierId);
+  }, [productOptionsQuery.data?.content, selectedSupplierId]);
+
   const createMutation = useMutation({
     mutationFn: (values: CreatePurchaseValues) =>
       createPurchase({
@@ -82,7 +89,7 @@ export function PurchasesPage() {
   }
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-4 md:space-y-6">
       <PageHeader title="Purchases" subtitle="Create purchase orders and continue to receive flow." />
 
       <FilterToolbar
@@ -109,7 +116,7 @@ export function PurchasesPage() {
         <ErrorBlock title="Create purchase failed" description={(createMutation.error as Error).message || "Try again."} onRetry={() => createMutation.reset()} retryLabel="Reset" />
       ) : null}
 
-      <div className="grid gap-6 lg:grid-cols-[1.1fr_0.9fr]">
+      <div className="grid gap-4 md:gap-6 lg:grid-cols-[1.1fr_0.9fr]">
         <Card className="space-y-3">
           <h2 className="text-lg font-bold">Purchase orders</h2>
           {purchasesQuery.isLoading ? <LoadingBlock title="Loading purchases" description="Fetching purchase order data..." /> : null}
@@ -175,7 +182,15 @@ export function PurchasesPage() {
           <form className="space-y-2" onSubmit={form.handleSubmit((values) => createMutation.mutate(values))}>
             <div className="space-y-1">
               <label className="text-xs font-bold uppercase tracking-widest text-on-surface-variant">Supplier</label>
-              <select className="h-10 w-full rounded-xl border border-outline-variant/30 bg-surface-container-low px-3 text-sm" {...form.register("supplierId")}>
+              <select
+                className="h-10 w-full rounded-xl border border-outline-variant/30 bg-surface-container-low px-3 text-sm"
+                {...form.register("supplierId", {
+                  onChange: (event) => {
+                    form.setValue("supplierId", event.target.value, { shouldDirty: true, shouldValidate: true });
+                    form.setValue("productId", "", { shouldDirty: true, shouldValidate: true });
+                  },
+                })}
+              >
                 <option value="">Select supplier</option>
                 {suppliersQuery.data?.map((supplier) => (
                   <option key={supplier.id} value={supplier.id}>
@@ -188,9 +203,13 @@ export function PurchasesPage() {
 
             <div className="space-y-1">
               <label className="text-xs font-bold uppercase tracking-widest text-on-surface-variant">Product</label>
-              <select className="h-10 w-full rounded-xl border border-outline-variant/30 bg-surface-container-low px-3 text-sm" {...form.register("productId")}>
-                <option value="">Select product</option>
-                {productOptionsQuery.data?.content.map((product) => (
+              <select
+                className="h-10 w-full rounded-xl border border-outline-variant/30 bg-surface-container-low px-3 text-sm"
+                {...form.register("productId")}
+                disabled={!selectedSupplierId}
+              >
+                <option value="">{selectedSupplierId ? "Select product" : "Select supplier first"}</option>
+                {productOptions.map((product) => (
                   <option key={product.id} value={product.id}>
                     {product.name} ({product.sku})
                   </option>

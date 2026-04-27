@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { useParams } from "react-router-dom";
+import { useNavigate, useParams } from "react-router-dom";
+import { ArrowLeft } from "lucide-react";
 
 import { ConfirmDialog } from "@/components/shared/confirm-dialog";
 import { PageHeader } from "@/components/shared/page-header";
@@ -15,6 +16,7 @@ import { ROLE } from "@/types/enums";
 
 export function SaleDetailPage() {
   const { id } = useParams<{ id: string }>();
+  const navigate = useNavigate();
   const { user } = useAuth();
   const queryClient = useQueryClient();
   const [openCancelDialog, setOpenCancelDialog] = useState(false);
@@ -50,16 +52,30 @@ export function SaleDetailPage() {
   const canCancel = user?.role === ROLE.OWNER && sale.status !== "CANCELLED";
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-4 md:space-y-6">
       <PageHeader
         title={`Sale ${sale.invoiceNo}`}
         subtitle={`Cashier ${sale.cashierName} • ${new Date(sale.createdAt).toLocaleString("id-ID")}`}
         actions={
-          canCancel ? (
-            <Button variant="destructive" onClick={() => setOpenCancelDialog(true)}>
-              Cancel Sale
+          <div className="flex w-full flex-wrap items-center justify-between gap-2 sm:w-auto sm:justify-start">
+            <Button
+              type="button"
+              variant="secondary"
+              onClick={() => {
+                // Use browser history when possible; otherwise fallback to sales list.
+                if (window.history.length > 1) navigate(-1);
+                else navigate("/sales");
+              }}
+            >
+              <ArrowLeft className="h-4 w-4" />
+              Back
             </Button>
-          ) : null
+            {canCancel ? (
+              <Button className="sm:ml-4" variant="destructive" onClick={() => setOpenCancelDialog(true)}>
+                Cancel Sale
+              </Button>
+            ) : null}
+          </div>
         }
       />
 
@@ -70,7 +86,7 @@ export function SaleDetailPage() {
         <ErrorBlock title="Cancel failed" description={(cancelMutation.error as Error).message} onRetry={() => cancelMutation.reset()} retryLabel="Reset" />
       ) : null}
 
-      <div className="grid gap-6 lg:grid-cols-[1fr_0.85fr]">
+      <div className="grid gap-4 md:gap-6 lg:grid-cols-[1fr_0.85fr]">
         <Card className="space-y-3">
           <h2 className="text-lg font-bold">Items</h2>
           <div className="space-y-2">
@@ -107,6 +123,18 @@ export function SaleDetailPage() {
               <span>Discount</span>
               <span className="tabular-nums-idr">-{formatIDR(sale.totals.discount)}</span>
             </p>
+            {sale.totals.taxAmount != null ? (
+              <p className="flex items-center justify-between">
+                <span>Tax{sale.totals.taxRate != null ? ` (${Math.round(sale.totals.taxRate * 100)}%)` : ""}</span>
+                <span className="tabular-nums-idr">{formatIDR(sale.totals.taxAmount)}</span>
+              </p>
+            ) : null}
+            {sale.totals.adminFee != null ? (
+              <p className="flex items-center justify-between">
+                <span>Admin fee</span>
+                <span className="tabular-nums-idr">{formatIDR(sale.totals.adminFee)}</span>
+              </p>
+            ) : null}
             <p className="flex items-center justify-between text-base font-bold">
               <span>Total</span>
               <span className="tabular-nums-idr">{formatIDR(sale.totals.total)}</span>
