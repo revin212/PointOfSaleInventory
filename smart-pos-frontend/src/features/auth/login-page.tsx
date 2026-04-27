@@ -5,6 +5,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { useNavigate } from "react-router-dom";
 
 import { AppLogo } from "@/components/shared/app-logo";
+import { Modal } from "@/components/shared/modal";
 import { ErrorBlock } from "@/components/shared/state-blocks";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
@@ -42,10 +43,12 @@ export function LoginPage() {
   const navigate = useNavigate();
   const { login } = useAuth();
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
+  const [openDummyAccounts, setOpenDummyAccounts] = useState(false);
 
   const {
     register,
     handleSubmit,
+    setValue,
     formState: { errors, isSubmitting },
   } = useForm<LoginFormValues>({
     resolver: zodResolver(loginSchema),
@@ -89,6 +92,30 @@ export function LoginPage() {
     }
   };
 
+  const dummyAccounts = useMemo(() => {
+    const password = USE_MOCKS ? "password123" : "Password123!";
+    return [
+      {
+        role: ROLE.OWNER as Role,
+        label: "Owner",
+        email: USE_MOCKS ? "owner@store.com" : "owner@smartpos.local",
+        password,
+      },
+      {
+        role: ROLE.CASHIER as Role,
+        label: "Cashier",
+        email: USE_MOCKS ? "cashier@store.com" : "cashier@smartpos.local",
+        password,
+      },
+      {
+        role: ROLE.WAREHOUSE as Role,
+        label: "Warehouse",
+        email: USE_MOCKS ? "warehouse@store.com" : "warehouse@smartpos.local",
+        password,
+      },
+    ];
+  }, []);
+
   return (
     <div className="relative flex min-h-screen items-center justify-center bg-surface p-4 sm:p-6">
       <div className="absolute inset-0 -z-10 overflow-hidden">
@@ -102,11 +129,18 @@ export function LoginPage() {
         <Card className="shadow-ambient">
           <CardHeader>
             <CardTitle className="text-2xl font-black">Sign in to POS</CardTitle>
-            <CardDescription>
-              {USE_MOCKS
-                ? "Mock mode: pick any role to explore the UI."
-                : "Sign in with the credentials provisioned by your owner account."}
-            </CardDescription>
+            <div className="space-y-3">
+              <CardDescription>
+                {USE_MOCKS
+                  ? "Mock mode: pick any role to explore the UI."
+                  : "Sign in with the credentials provisioned by your owner account."}
+              </CardDescription>
+              <div className="flex flex-wrap gap-2">
+                <Button type="button" variant="secondary" size="sm" onClick={() => setOpenDummyAccounts(true)}>
+                  Dummy Accounts
+                </Button>
+              </div>
+            </div>
           </CardHeader>
           <CardContent>
             <form className="space-y-4" onSubmit={handleSubmit(onSubmit)} noValidate>
@@ -158,6 +192,77 @@ export function LoginPage() {
           />
         ) : null}
       </div>
+
+      <Modal open={openDummyAccounts} title="Dummy Accounts" onClose={() => setOpenDummyAccounts(false)}>
+        <div className="space-y-3">
+          <div className="rounded-xl border border-outline-variant/20 bg-surface-container-low p-3 text-sm text-on-surface-variant">
+            <p className="font-semibold text-on-surface">Use these accounts for demo.</p>
+            <p className="mt-1">
+              {USE_MOCKS ? "Mock mode uses @store.com + password123." : "DB mode uses seeded @smartpos.local users."}
+            </p>
+          </div>
+
+          <div className="space-y-2">
+            {dummyAccounts.map((acc) => (
+              <div key={acc.role} className="rounded-xl bg-surface-container-low p-3">
+                <div className="flex flex-wrap items-start justify-between gap-3">
+                  <div className="min-w-0">
+                    <p className="font-semibold">{acc.label}</p>
+                    <p className="text-xs text-on-surface-variant">Role: {acc.role}</p>
+                  </div>
+                  {USE_MOCKS ? (
+                    <Button
+                      type="button"
+                      variant="secondary"
+                      size="sm"
+                      onClick={() => {
+                        setValue("email", acc.email, { shouldDirty: true });
+                        setValue("password", acc.password, { shouldDirty: true });
+                        setValue("role", acc.role, { shouldDirty: true });
+                        setOpenDummyAccounts(false);
+                      }}
+                    >
+                      Use this
+                    </Button>
+                  ) : (
+                    <Button
+                      type="button"
+                      variant="secondary"
+                      size="sm"
+                      onClick={async () => {
+                        try {
+                          await navigator.clipboard.writeText(`${acc.email} / ${acc.password}`);
+                        } catch {
+                          // ignore clipboard failures
+                        }
+                      }}
+                    >
+                      Copy
+                    </Button>
+                  )}
+                </div>
+
+                <div className="mt-3 grid gap-2 text-sm sm:grid-cols-2">
+                  <div className="rounded-xl bg-surface-container-highest/40 px-3 py-2">
+                    <p className="text-xs font-bold uppercase tracking-widest text-on-surface-variant">Email</p>
+                    <p className="mt-1 font-semibold">{acc.email}</p>
+                  </div>
+                  <div className="rounded-xl bg-surface-container-highest/40 px-3 py-2">
+                    <p className="text-xs font-bold uppercase tracking-widest text-on-surface-variant">Password</p>
+                    <p className="mt-1 font-semibold">{acc.password}</p>
+                  </div>
+                </div>
+              </div>
+            ))}
+          </div>
+
+          <div className="flex justify-end">
+            <Button type="button" onClick={() => setOpenDummyAccounts(false)}>
+              Close
+            </Button>
+          </div>
+        </div>
+      </Modal>
     </div>
   );
 }
