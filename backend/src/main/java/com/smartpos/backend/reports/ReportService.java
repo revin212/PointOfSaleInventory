@@ -43,7 +43,9 @@ public class ReportService {
 
         Object[] totals = firstRow(reportRepository.salesTotals(SaleStatus.COMPLETED, from, to));
         long salesCount = ((Number) totals[0]).longValue();
-        BigDecimal totalRevenue = toBigDecimal(totals[1]);
+        BigDecimal netRevenue = toBigDecimal(totals[1]);
+        BigDecimal taxRevenue = toBigDecimal(totals[2]);
+        BigDecimal totalRevenue = toBigDecimal(totals[3]);
 
         Object[] cancelled = firstRow(reportRepository.cancelledTotals(SaleStatus.CANCELLED, from, to));
         long cancelledCount = ((Number) cancelled[0]).longValue();
@@ -61,7 +63,7 @@ public class ReportService {
         }
 
         return new DailySummaryResponse(
-                date, salesCount, totalRevenue,
+                date, salesCount, netRevenue, taxRevenue, totalRevenue,
                 itemsSold == null ? 0L : itemsSold,
                 cancelledCount, cancelledAmount,
                 breakdown
@@ -94,7 +96,7 @@ public class ReportService {
     }
 
     private Object[] firstRow(List<Object[]> rows) {
-        if (rows == null || rows.isEmpty()) return new Object[] {0L, BigDecimal.ZERO};
+        if (rows == null || rows.isEmpty()) return new Object[] {0L, BigDecimal.ZERO, BigDecimal.ZERO, BigDecimal.ZERO};
         return rows.get(0);
     }
 

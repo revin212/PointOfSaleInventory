@@ -31,15 +31,18 @@ public class StockQueryService {
     private final ProductRepository productRepository;
     private final CategoryRepository categoryRepository;
     private final StockMovementRepository movementRepository;
+    private final ProductStockRepository productStockRepository;
     private final UserRepository userRepository;
 
     public StockQueryService(ProductRepository productRepository,
                              CategoryRepository categoryRepository,
                              StockMovementRepository movementRepository,
+                             ProductStockRepository productStockRepository,
                              UserRepository userRepository) {
         this.productRepository = productRepository;
         this.categoryRepository = categoryRepository;
         this.movementRepository = movementRepository;
+        this.productStockRepository = productStockRepository;
         this.userRepository = userRepository;
     }
 
@@ -51,9 +54,8 @@ public class StockQueryService {
         List<UUID> productIds = page.getContent().stream().map(ProductEntity::getId).toList();
         Map<UUID, Integer> onHandByProduct = new HashMap<>();
         if (!productIds.isEmpty()) {
-            for (Object[] row : movementRepository.sumQtyByProducts(productIds)) {
-                onHandByProduct.put((UUID) row[0], ((Number) row[1]).intValue());
-            }
+            productStockRepository.findByProductIds(StockLedgerService.DEFAULT_LOCATION_ID, productIds)
+                    .forEach(s -> onHandByProduct.put(s.getProductId(), s.getOnHand()));
         }
 
         Set<UUID> catIds = page.getContent().stream()

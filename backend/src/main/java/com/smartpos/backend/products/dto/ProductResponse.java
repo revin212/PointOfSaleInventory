@@ -12,6 +12,8 @@ public record ProductResponse(
         String name,
         UUID categoryId,
         String categoryName,
+        UUID supplierId,
+        String supplierName,
         String unit,
         BigDecimal cost,
         BigDecimal price,
@@ -21,13 +23,15 @@ public record ProductResponse(
         Instant createdAt,
         Instant updatedAt
 ) {
-    public static ProductResponse from(ProductEntity p, String categoryName) {
+    public static ProductResponse from(ProductEntity p, String categoryName, String supplierName) {
         return new ProductResponse(
                 p.getId(),
                 p.getSku(),
                 p.getName(),
                 p.getCategoryId(),
                 categoryName,
+                p.getSupplierId(),
+                supplierName,
                 p.getUnit(),
                 p.getCost(),
                 p.getPrice(),

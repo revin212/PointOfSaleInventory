@@ -6,6 +6,8 @@ import com.smartpos.backend.common.error.ConflictException;
 import com.smartpos.backend.common.error.NotFoundException;
 import com.smartpos.backend.products.dto.ProductResponse;
 import com.smartpos.backend.products.dto.ProductUpsertRequest;
+import com.smartpos.backend.suppliers.SupplierEntity;
+import com.smartpos.backend.suppliers.SupplierRepository;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
@@ -23,10 +25,14 @@ public class ProductService {
 
     private final ProductRepository productRepository;
     private final CategoryRepository categoryRepository;
+    private final SupplierRepository supplierRepository;
 
-    public ProductService(ProductRepository productRepository, CategoryRepository categoryRepository) {
+    public ProductService(ProductRepository productRepository,
+                          CategoryRepository categoryRepository,
+                          SupplierRepository supplierRepository) {
         this.productRepository = productRepository;
         this.categoryRepository = categoryRepository;
+        this.supplierRepository = supplierRepository;
     }
 
     @Transactional(readOnly = true)
@@ -36,16 +42,24 @@ public class ProductService {
 
         Map<UUID, String> categoryNames = resolveCategoryNames(
                 page.getContent().stream().map(ProductEntity::getCategoryId).collect(Collectors.toSet()));
+        Map<UUID, String> supplierNames = resolveSupplierNames(
+                page.getContent().stream().map(ProductEntity::getSupplierId).collect(Collectors.toSet()));
 
-        return page.map(p -> ProductResponse.from(p, categoryNames.get(p.getCategoryId())));
+        return page.map(p -> ProductResponse.from(
+                p,
+                categoryNames.get(p.getCategoryId()),
+                supplierNames.get(p.getSupplierId())
+        ));
     }
 
     @Transactional(readOnly = true)
     public ProductResponse get(UUID id) {
         ProductEntity p = findOrThrow(id);
-        String name = p.getCategoryId() == null ? null :
+        String categoryName = p.getCategoryId() == null ? null :
                 categoryRepository.findById(p.getCategoryId()).map(CategoryEntity::getName).orElse(null);
-        return ProductResponse.from(p, name);
+        String supplierName = p.getSupplierId() == null ? null :
+                supplierRepository.findById(p.getSupplierId()).map(SupplierEntity::getName).orElse(null);
+        return ProductResponse.from(p, categoryName, supplierName);
     }
 
     @Transactional
@@ -60,7 +74,9 @@ public class ProductService {
         ProductEntity saved = productRepository.save(p);
         String categoryName = saved.getCategoryId() == null ? null :
                 categoryRepository.findById(saved.getCategoryId()).map(CategoryEntity::getName).orElse(null);
-        return ProductResponse.from(saved, categoryName);
+        String supplierName = saved.getSupplierId() == null ? null :
+                supplierRepository.findById(saved.getSupplierId()).map(SupplierEntity::getName).orElse(null);
+        return ProductResponse.from(saved, categoryName, supplierName);
     }
 
     @Transactional
@@ -75,7 +91,9 @@ public class ProductService {
         ProductEntity saved = productRepository.save(p);
         String categoryName = saved.getCategoryId() == null ? null :
                 categoryRepository.findById(saved.getCategoryId()).map(CategoryEntity::getName).orElse(null);
-        return ProductResponse.from(saved, categoryName);
+        String supplierName = saved.getSupplierId() == null ? null :
+                supplierRepository.findById(saved.getSupplierId()).map(SupplierEntity::getName).orElse(null);
+        return ProductResponse.from(saved, categoryName, supplierName);
     }
 
     @Transactional
@@ -92,6 +110,10 @@ public class ProductService {
             throw new NotFoundException("Category not found");
         }
         p.setCategoryId(req.categoryId());
+        if (req.supplierId() != null && !supplierRepository.existsById(req.supplierId())) {
+            throw new NotFoundException("Supplier not found");
+        }
+        p.setSupplierId(req.supplierId());
         p.setUnit(req.unit().trim());
         p.setCost(req.cost());
         p.setPrice(req.price());
@@ -105,6 +127,14 @@ public class ProductService {
         List<UUID> nonNull = ids.stream().filter(java.util.Objects::nonNull).toList();
         if (nonNull.isEmpty()) return map;
         categoryRepository.findAllById(nonNull).forEach(c -> map.put(c.getId(), c.getName()));
+        return map;
+    }
+
+    private Map<UUID, String> resolveSupplierNames(Set<UUID> ids) {
+        Map<UUID, String> map = new HashMap<>();
+        List<UUID> nonNull = ids.stream().filter(java.util.Objects::nonNull).toList();
+        if (nonNull.isEmpty()) return map;
+        supplierRepository.findAllById(nonNull).forEach(s -> map.put(s.getId(), s.getName()));
         return map;
     }
 

@@ -27,6 +27,7 @@ public final class AuditAction {
 
     public static final String SALE_CREATE = "SALE_CREATE";
     public static final String SALE_CANCEL = "SALE_CANCEL";
+    public static final String SALE_RETURN = "SALE_RETURN";
 
     public static final String STOCK_ADJUSTMENT = "STOCK_ADJUSTMENT";
 }

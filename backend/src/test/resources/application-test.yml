@@ -1,0 +1,6 @@
+app:
+  tax:
+    enabled: false
+  shift:
+    require-open-for-cash-sales: false
+

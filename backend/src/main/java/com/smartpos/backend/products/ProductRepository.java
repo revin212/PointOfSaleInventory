@@ -37,9 +37,10 @@ public interface ProductRepository extends JpaRepository<ProductEntity, UUID> {
                     OR LOWER(COALESCE(p.barcode, '')) LIKE CONCAT('%', :query, '%'))
               AND (:categoryId IS NULL OR p.categoryId = :categoryId)
               AND (:lowOnly = FALSE OR
-                   (SELECT COALESCE(SUM(m.qtyDelta), 0)
-                      FROM com.smartpos.backend.stock.StockMovementEntity m
-                     WHERE m.productId = p.id) <= p.lowStockThreshold)
+                   COALESCE((SELECT s.onHand
+                               FROM com.smartpos.backend.stock.ProductStockEntity s
+                              WHERE s.productId = p.id
+                                AND s.locationId = com.smartpos.backend.stock.StockLedgerService.DEFAULT_LOCATION_ID), 0) <= p.lowStockThreshold)
             """)
     Page<ProductEntity> searchForStock(@Param("query") String query,
                                        @Param("categoryId") UUID categoryId,

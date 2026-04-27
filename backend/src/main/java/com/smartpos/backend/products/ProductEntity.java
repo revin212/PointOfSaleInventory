@@ -21,6 +21,9 @@ public class ProductEntity extends BaseEntity {
     @Column(name = "category_id")
     private UUID categoryId;
 
+    @Column(name = "supplier_id")
+    private UUID supplierId;
+
     @Column(name = "unit", nullable = false, length = 20)
     private String unit;
 
@@ -47,6 +50,9 @@ public class ProductEntity extends BaseEntity {
 
     public UUID getCategoryId() { return categoryId; }
     public void setCategoryId(UUID categoryId) { this.categoryId = categoryId; }
+
+    public UUID getSupplierId() { return supplierId; }
+    public void setSupplierId(UUID supplierId) { this.supplierId = supplierId; }
 
     public String getUnit() { return unit; }
     public void setUnit(String unit) { this.unit = unit; }

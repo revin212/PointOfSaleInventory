@@ -4,5 +4,6 @@ public enum StockMovementType {
     PURCHASE_RECEIVE,
     SALE,
     ADJUSTMENT,
-    SALE_CANCEL
+    SALE_CANCEL,
+    RETURN
 }

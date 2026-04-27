@@ -26,7 +26,10 @@ public interface ReportRepository extends JpaRepository<SaleEntity, UUID> {
                                                  @Param("to") Instant to);
 
     @Query("""
-            SELECT COUNT(s), COALESCE(SUM(s.total), 0)
+            SELECT COUNT(s),
+                   COALESCE(SUM(s.netAmount), 0),
+                   COALESCE(SUM(s.taxAmount), 0),
+                   COALESCE(SUM(s.total), 0)
             FROM SaleEntity s
             WHERE s.status = :status
               AND s.createdAt >= :from

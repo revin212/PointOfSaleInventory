@@ -14,6 +14,7 @@ public record ProductUpsertRequest(
         @NotBlank @Size(max = 60)  String sku,
         @NotBlank @Size(max = 200) String name,
         UUID categoryId,
+        @NotNull UUID supplierId,
         @NotBlank @Size(max = 20) String unit,
         @NotNull @DecimalMin("0.00") @Digits(integer = 16, fraction = 2) BigDecimal cost,
         @NotNull @DecimalMin("0.00") @Digits(integer = 16, fraction = 2) BigDecimal price,

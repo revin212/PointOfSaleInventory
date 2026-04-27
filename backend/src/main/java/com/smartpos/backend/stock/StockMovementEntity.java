@@ -30,6 +30,9 @@ public class StockMovementEntity {
     @Column(name = "product_id", nullable = false)
     private UUID productId;
 
+    @Column(name = "location_id", nullable = false)
+    private UUID locationId;
+
     @Enumerated(EnumType.STRING)
     @Column(name = "type", nullable = false, length = 30)
     private StockMovementType type;
@@ -61,6 +64,9 @@ public class StockMovementEntity {
 
     public UUID getProductId() { return productId; }
     public void setProductId(UUID productId) { this.productId = productId; }
+
+    public UUID getLocationId() { return locationId; }
+    public void setLocationId(UUID locationId) { this.locationId = locationId; }
 
     public StockMovementType getType() { return type; }
     public void setType(StockMovementType type) { this.type = type; }

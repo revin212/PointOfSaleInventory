@@ -7,6 +7,8 @@ public record AppProperties(
         String basePath,
         Cors cors,
         Jwt jwt,
+        Tax tax,
+        Shift shift,
         Seed seed
 ) {
     public record Cors(String allowedOrigins) {}
@@ -18,5 +20,15 @@ public record AppProperties(
             long refreshTokenTtlSeconds
     ) {}
 
-    public record Seed(boolean enabled, String defaultPassword) {}
+    public record Tax(
+            boolean enabled,
+            String mode,
+            java.math.BigDecimal vatRate
+    ) {}
+
+    public record Shift(
+            boolean requireOpenForCashSales
+    ) {}
+
+    public record Seed(boolean enabled, String defaultPassword, boolean forceResetPasswords) {}
 }

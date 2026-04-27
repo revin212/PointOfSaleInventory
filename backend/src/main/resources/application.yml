@@ -40,9 +40,16 @@ app:
     secret: ${JWT_SECRET:change-me-please-this-is-a-dev-only-secret-please-replace-32+}
     access-token-ttl-seconds: ${JWT_ACCESS_TTL:900}
     refresh-token-ttl-seconds: ${JWT_REFRESH_TTL:1209600}
+  tax:
+    enabled: ${APP_TAX_ENABLED:true}
+    mode: ${APP_TAX_MODE:EXCLUSIVE}
+    vat-rate: ${APP_VAT_RATE:0.11}
+  shift:
+    require-open-for-cash-sales: ${APP_SHIFT_REQUIRE_OPEN_FOR_CASH_SALES:false}
   seed:
     enabled: ${APP_SEED_ENABLED:true}
     default-password: ${APP_SEED_PASSWORD:Password123!}
+    force-reset-passwords: ${APP_SEED_FORCE_RESET_PASSWORDS:false}
 
 springdoc:
   api-docs:
