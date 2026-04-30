@@ -1,0 +1,54 @@
+services:
+  db:
+    image: postgres:16-alpine
+    container_name: smart_pos_db
+    environment:
+      POSTGRES_DB: ${POSTGRES_DB:-smart_pos}
+      POSTGRES_USER: ${POSTGRES_USER:-smart_pos}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-smart_pos}
+    volumes:
+      - smart_pos_db:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-smart_pos} -d ${POSTGRES_DB:-smart_pos}"]
+      interval: 5s
+      timeout: 5s
+      retries: 20
+    restart: unless-stopped
+
+  backend:
+    build:
+      context: ./backend
+    container_name: smart_pos_backend
+    depends_on:
+      db:
+        condition: service_healthy
+    environment:
+      SERVER_PORT: 8080
+      DATABASE_URL: jdbc:postgresql://db:5432/${POSTGRES_DB:-smart_pos}
+      DATABASE_USERNAME: ${POSTGRES_USER:-smart_pos}
+      DATABASE_PASSWORD: ${POSTGRES_PASSWORD:-smart_pos}
+      JWT_SECRET: ${JWT_SECRET}
+      JWT_ACCESS_TTL: ${JWT_ACCESS_TTL:-900}
+      JWT_REFRESH_TTL: ${JWT_REFRESH_TTL:-1209600}
+      # Because frontend is served by the same origin, CORS can be tightened.
+      CORS_ALLOWED_ORIGINS: ${CORS_ALLOWED_ORIGINS:-http://localhost}
+      APP_SEED_ENABLED: ${APP_SEED_ENABLED:-false}
+      APP_SEED_PASSWORD: ${APP_SEED_PASSWORD:-Password123!}
+      APP_SEED_FORCE_RESET_PASSWORDS: ${APP_SEED_FORCE_RESET_PASSWORDS:-false}
+      JAVA_OPTS: ${BACKEND_JAVA_OPTS:-}
+    restart: unless-stopped
+
+  web:
+    build:
+      context: ./smart-pos-frontend
+      args:
+        VITE_API_BASE_URL: ${VITE_API_BASE_URL:-/api/v1}
+    container_name: smart_pos_web
+    ports:
+      - "${WEB_PORT:-80}:80"
+    depends_on:
+      - backend
+    restart: unless-stopped
+
+volumes:
+  smart_pos_db:
