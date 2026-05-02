@@ -29,9 +29,9 @@ purchases, and owners see reports and manage users.
 
 ## Prerequisites
 
-- **JDK 21** and **Maven 3.9+**
-- **Node.js 20+** and **npm**
-- **Docker** (for local PostgreSQL)
+- **Docker** (required for full-stack Docker; also used for PostgreSQL in the hybrid flow below)
+- **JDK 21** and **Maven 3.9+** (hybrid local run: Postgres in Docker, backend/frontend on the host)
+- **Node.js 20+** and **npm** (hybrid local run only)
 
 ## Run locally
 
@@ -73,6 +73,51 @@ npm run dev
 Frontend is served at `http://localhost:5173`. Log in with any of the seeded
 users above.
 
+## Run locally (full Docker)
+
+PostgreSQL, Spring Boot, and the production-built frontend (Nginx) all run in
+containers via [`docker-compose.prod.yml`](docker-compose.prod.yml). You do not
+need JDK or Node on the host.
+
+1. From the repository root, create `.env.prod`. Copy the example and set at
+   least **`JWT_SECRET`** (minimum ~32 bytes):
+
+   ```powershell
+   copy .env.prod.example .env.prod
+   ```
+
+   On macOS or Linux, use `cp .env.prod.example .env.prod` instead.
+
+   For first-time login with the seeded accounts in the table above, set
+   **`APP_SEED_ENABLED=true`**. Use **`WEB_PORT=8080`** if binding port **80**
+   is inconvenient (for example on Windows without elevation); then open
+   `http://localhost:8080`. If you change **`WEB_PORT`** or the hostname,
+   update **`CORS_ALLOWED_ORIGINS`** to comma-separated browser origins that
+   match (for example `http://localhost:8080`).
+
+2. Build and start:
+
+   ```powershell
+   docker compose -f docker-compose.prod.yml --env-file .env.prod up -d --build
+   ```
+
+3. Open the app (**`<WEB_PORT>`** defaults to **80** in `.env.prod.example`):
+
+   - **UI** — `http://localhost:<WEB_PORT>/`
+   - **API** — `http://localhost:<WEB_PORT>/api/v1`
+   - **Swagger** — `http://localhost:<WEB_PORT>/swagger-ui.html`
+
+   Nginx serves the SPA and proxies `/api/v1` to the backend service.
+
+4. Stop:
+
+   ```powershell
+   docker compose -f docker-compose.prod.yml --env-file .env.prod down
+   ```
+
+See [`DEPLOY_VPS_DOCKER.md`](DEPLOY_VPS_DOCKER.md) for VPS deployment, HTTPS,
+and backups.
+
 ## Environment configuration
 
 ### Frontend (`smart-pos-frontend/.env.development`)
@@ -95,9 +140,10 @@ without a backend — useful for UI-only work. No code changes required.
 ## Project layout
 
 ```
-backend/                Spring Boot API (Java 21)
-smart-pos-frontend/     React + Vite web UI
-how-to-run.txt          One-page quick-start cheatsheet
+backend/                  Spring Boot API (Java 21)
+smart-pos-frontend/       React + Vite web UI
+docker-compose.prod.yml   Postgres + backend + Nginx (full Docker)
+how-to-run.txt            One-page quick-start cheatsheet
 ```
 
 See [`backend/README.md`](backend/README.md) for the full API reference and
