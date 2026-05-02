@@ -15,7 +15,7 @@ export function ProtectedRoute({ allowedRoles }: ProtectedRouteProps) {
   if (isBootstrapping) {
     return (
       <div className="flex min-h-screen items-center justify-center bg-surface p-6">
-        <LoadingBlock title="Loading session" description="Restoring your Smart POS session..." />
+        <LoadingBlock title="Loading session" description="Restoring your session..." />
       </div>
     );
   }
