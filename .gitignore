@@ -6,6 +6,7 @@ dist/
 # env files (secrets)
 .env
 .env.*
+!.env.*.example
 
 # frontend artifacts
 smart-pos-frontend/node_modules/

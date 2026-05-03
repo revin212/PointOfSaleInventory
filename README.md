@@ -75,12 +75,15 @@ users above.
 
 ## Run locally (full Docker)
 
-PostgreSQL, Spring Boot, and the production-built frontend (Nginx) all run in
-containers via [`docker-compose.prod.yml`](docker-compose.prod.yml). You do not
-need JDK or Node on the host.
+Spring Boot and the production-built frontend (Nginx) run via
+[`docker-compose.prod.yml`](docker-compose.prod.yml). PostgreSQL is **not**
+defined in that file: the backend expects Postgres reachable on the Docker
+network `shared_db_net` (same model as a multi-project VPS). You do not need
+JDK or Node on the host.
 
-1. From the repository root, create `.env.prod`. Copy the example and set at
-   least **`JWT_SECRET`** (minimum ~32 bytes):
+1. From the repository root, create `.env.prod` from the example and set
+   **`JWT_SECRET`**, **`DATABASE_URL`**, **`DATABASE_USERNAME`**, and
+   **`DATABASE_PASSWORD`** (see [`.env.prod.example`](.env.prod.example)):
 
    ```powershell
    copy .env.prod.example .env.prod
@@ -95,11 +98,29 @@ need JDK or Node on the host.
    update **`CORS_ALLOWED_ORIGINS`** to comma-separated browser origins that
    match (for example `http://localhost:8080`).
 
-2. Build and start:
+2. **Start Postgres and the app** — pick one:
 
-   ```powershell
-   docker compose -f docker-compose.prod.yml --env-file .env.prod up -d --build
-   ```
+   - **Bundled Postgres (simplest for a single machine):** create the network
+     once, then start the app with the local override (adds a `db` container and
+     wires the backend to it). You can use the default passwords in
+     `.env.prod.example` for `POSTGRES_*` / `DATABASE_*` if you keep them
+     consistent.
+
+     ```powershell
+     docker network create shared_db_net
+     docker compose -f docker-compose.prod.yml -f docker-compose.local-db.override.yml --env-file .env.prod up -d --build
+     ```
+
+   - **Shared Postgres container (mirrors VPS):** create the network, run
+     [`docker-compose.postgres.shared.example.yml`](docker-compose.postgres.shared.example.yml)
+     with [`.env.postgres.example`](.env.postgres.example) as a template, create
+     the `smart_pos` database and user (see
+     [`DEPLOY_VPS_DOCKER.md`](DEPLOY_VPS_DOCKER.md)), then start only the app:
+
+     ```powershell
+     docker network create shared_db_net
+     docker compose -f docker-compose.prod.yml --env-file .env.prod up -d --build
+     ```
 
 3. Open the app (**`<WEB_PORT>`** defaults to **80** in `.env.prod.example`):
 
@@ -109,14 +130,15 @@ need JDK or Node on the host.
 
    Nginx serves the SPA and proxies `/api/v1` to the backend service.
 
-4. Stop:
+4. Stop the app (Postgres from the override is stopped with the project; a
+   separate shared-Postgres stack is stopped from its own directory):
 
    ```powershell
    docker compose -f docker-compose.prod.yml --env-file .env.prod down
    ```
 
-See [`DEPLOY_VPS_DOCKER.md`](DEPLOY_VPS_DOCKER.md) for VPS deployment, HTTPS,
-and backups.
+See [`DEPLOY_VPS_DOCKER.md`](DEPLOY_VPS_DOCKER.md) for VPS deployment (shared
+Postgres), HTTPS, and backups.
 
 ## Environment configuration
 
@@ -140,10 +162,13 @@ without a backend — useful for UI-only work. No code changes required.
 ## Project layout
 
 ```
-backend/                  Spring Boot API (Java 21)
-smart-pos-frontend/       React + Vite web UI
-docker-compose.prod.yml   Postgres + backend + Nginx (full Docker)
-how-to-run.txt            One-page quick-start cheatsheet
+backend/                                  Spring Boot API (Java 21)
+smart-pos-frontend/                       React + Vite web UI
+docker-compose.prod.yml                   Backend + Nginx; DB on network shared_db_net
+docker-compose.postgres.shared.example.yml  Example shared Postgres for VPS/local
+docker-compose.local-db.override.yml      Optional bundled Postgres for full Docker locally
+.env.prod.example                         Template for production-style env
+how-to-run.txt                            One-page quick-start cheatsheet
 ```
 
 See [`backend/README.md`](backend/README.md) for the full API reference and

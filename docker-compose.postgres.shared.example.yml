@@ -1,0 +1,24 @@
+# Contoh stack Postgres bersama untuk VPS (satu instance, banyak database / proyek).
+# Salin ke lokasi terpisah (mis. /opt/shared-postgres/), buat .env.postgres dengan
+# POSTGRES_SUPERUSER_PASSWORD, lalu: docker compose -f ... --env-file .env.postgres up -d
+#
+# Setelah container jalan, buat user + database per aplikasi (lihat DEPLOY_VPS_DOCKER.md).
+
+services:
+  postgres:
+    image: postgres:16-alpine
+    container_name: postgres_shared
+    environment:
+      POSTGRES_PASSWORD: ${POSTGRES_SUPERUSER_PASSWORD:?Set POSTGRES_SUPERUSER_PASSWORD}
+    volumes:
+      - pg_shared_data:/var/lib/postgresql/data
+    networks:
+      - shared_db_net
+    restart: unless-stopped
+
+networks:
+  shared_db_net:
+    name: shared_db_net
+
+volumes:
+  pg_shared_data:

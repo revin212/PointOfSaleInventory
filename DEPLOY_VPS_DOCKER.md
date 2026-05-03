@@ -1,53 +1,68 @@
-## Deploy Smart POS (frontend + backend + DB) ke VPS pakai Docker
+## Deploy Smart POS ke VPS (backend + web + Postgres bersama)
 
-Dokumen ini memakai `docker-compose.prod.yml` (Postgres + Spring Boot + Nginx).
-Frontend di-serve oleh Nginx dan request `/api/v1/*` diproxy ke backend.
+Stack aplikasi memakai [`docker-compose.prod.yml`](docker-compose.prod.yml): Spring Boot + Nginx untuk frontend. **PostgreSQL tidak lagi di bundle**; satu container Postgres di VPS dipakai bersama banyak proyek (tiap aplikasi punya **database sendiri** di instance yang sama).
+
+Request `/api/v1/*` dari Nginx diproxy ke backend. Backend menyambung ke Postgres lewat **Docker network bersama** (`shared_db_net`).
 
 ### 0) Prasyarat VPS
 
-- OS: Ubuntu 22.04/24.04 (panduan ini contoh Ubuntu; untuk distro lain konsepnya sama)
-- Domain (opsional tapi sangat disarankan): `pos.example.com`
-- Port yang dibuka: `80` (dan `443` kalau pakai HTTPS)
+- OS: Ubuntu 22.04/24.04 (contoh; distro lain konsepnya sama)
+- Domain (opsional, disarankan): `pos.example.com`
+- Port yang dibuka: `80` (dan `443` jika HTTPS)
+- **Postgres bersama** sudah jalan dan backend Smart POS satu jaringan Docker dengannya (lihat bagian 2–3)
 
 ### 1) Install Docker + Compose plugin
-
-Ikuti dokumentasi resmi Docker (disarankan). Setelah terpasang, pastikan:
 
 ```bash
 docker --version
 docker compose version
 ```
 
-### 2) Upload kode ke VPS
+### 2) Postgres bersama (sekali per VPS, dipakai banyak proyek)
 
-Opsi paling umum:
+**Jaringan Docker** — buat sekali (abaikan jika sudah ada dari stack infra lain):
 
-- `git clone` repo ke VPS, atau
-- CI/CD build & pull image (lebih advanced)
+```bash
+docker network create shared_db_net
+```
 
-Contoh:
+Atau pastikan network yang sama dipakai oleh container Postgres Anda (nama harus cocok dengan [`docker-compose.prod.yml`](docker-compose.prod.yml): default external `shared_db_net`).
+
+**Contoh compose infra** — salin [`docker-compose.postgres.shared.example.yml`](docker-compose.postgres.shared.example.yml) ke lokasi terpisah di VPS (misalnya `/opt/shared-postgres/`), buat `.env.postgres` dari [`.env.postgres.example`](.env.postgres.example) (set `POSTGRES_SUPERUSER_PASSWORD`), lalu:
+
+```bash
+docker compose -f docker-compose.postgres.shared.example.yml --env-file .env.postgres up -d
+```
+
+Jangan publish port `5432` ke internet; cukup antar-container di jaringan Docker.
+
+**Bootstrap database untuk Smart POS** (jalankan sebagai superuser Postgres, misalnya user `postgres` di dalam container):
+
+```bash
+docker exec -it postgres_shared psql -U postgres -c "CREATE USER smart_pos WITH PASSWORD 'GANTI_PASSWORD_KUAT';"
+docker exec -it postgres_shared psql -U postgres -c "CREATE DATABASE smart_pos OWNER smart_pos;"
+```
+
+Sesuaikan nama container (`postgres_shared` mengikuti contoh compose infra), user, dan password. Untuk produksi, **disarankan** user aplikasi hanya punya hak pada database proyek ini, bukan superuser.
+
+### 3) Siapkan environment aplikasi
+
+Dari root repo:
 
 ```bash
 git clone <repo-url> smart-pos
 cd smart-pos
-```
-
-### 3) Siapkan environment production
-
-Copy template env:
-
-```bash
 cp .env.prod.example .env.prod
 ```
 
-Lalu edit `.env.prod`:
+Edit `.env.prod`:
 
-- **wajib**: `JWT_SECRET` (minimal 32 bytes) dan `POSTGRES_PASSWORD` yang kuat
-- set `WEB_PORT=80` (atau kalau ada reverse-proxy lain, bisa `8080`)
+- **Wajib**: `JWT_SECRET` (minimal ~32 byte), dan kredensial yang sama dengan yang dipakai di Postgres untuk user/database Smart POS
+- **`DATABASE_URL`**: host harus **nama service atau hostname container Postgres di jaringan `shared_db_net`** (contoh: `jdbc:postgresql://postgres:5432/smart_pos` jika service bernama `postgres`)
+- **`DATABASE_USERNAME`** / **`DATABASE_PASSWORD`**: user SQL untuk database `smart_pos`
+- `WEB_PORT=80` (atau `8080` jika ada reverse proxy di depan)
 
-### 4) Jalankan stack (build & up)
-
-Dari root repo:
+### 4) Jalankan stack aplikasi (build & up)
 
 ```bash
 docker compose -f docker-compose.prod.yml --env-file .env.prod up -d --build
@@ -67,27 +82,22 @@ docker logs smart_pos_web --tail=200
 - API: `http://<IP-VPS>/api/v1`
 - Swagger: `http://<IP-VPS>/swagger-ui.html`
 
-Catatan:
-- Untuk produksi, **disarankan HTTPS** (lihat bagian 7).
+Untuk produksi, **disarankan HTTPS** (bagian 7).
 
-### 6) Update / redeploy
+### 6) Update / redeploy (hanya aplikasi)
 
 ```bash
 git pull
 docker compose -f docker-compose.prod.yml --env-file .env.prod up -d --build
 ```
 
-### 7) HTTPS (opsi disarankan)
+Upgrade major PostgreSQL atau backup volume instance bersama dilakukan **di stack Postgres infra**, terpisah dari deploy repo ini.
 
-Pendekatan termudah: taruh reverse proxy di depan stack ini (Caddy / Nginx / Traefik)
-yang handle Let's Encrypt. Dua opsi praktis:
+### 7) HTTPS (disarankan)
 
-#### Opsi A: Caddy (paling sederhana)
+Reverse proxy di host (Caddy / Nginx / Traefik) dengan Let's Encrypt, proxy ke `WEB_PORT` stack ini.
 
-Jalankan Caddy di host (bukan di compose) atau sebagai container terpisah, lalu proxy ke `WEB_PORT` kamu.
-Jika stack ini expose `WEB_PORT=8080`, Caddy bisa listen di 80/443 dan proxy ke `127.0.0.1:8080`.
-
-Contoh `Caddyfile`:
+**Caddy** — jika aplikasi listen di `8080`:
 
 ```caddyfile
 pos.example.com {
@@ -95,28 +105,37 @@ pos.example.com {
 }
 ```
 
-#### Opsi B: Nginx + Certbot
+### 8) Backup & restore (per database `smart_pos`)
 
-Sama konsepnya: Nginx host listen 80/443 lalu proxy ke `127.0.0.1:8080`.
-
-### 8) Backup & restore database (Postgres volume)
+Gunakan **nama container Postgres bersama** Anda (contoh: `postgres_shared`), dan **satu database** agar tidak tercampur proyek lain.
 
 Backup:
 
 ```bash
-docker exec -t smart_pos_db pg_dump -U "$POSTGRES_USER" -d "$POSTGRES_DB" > smartpos_$(date +%F).sql
+docker exec -t postgres_shared pg_dump -U smart_pos -d smart_pos > smartpos_$(date +%F).sql
 ```
 
-Restore (contoh):
+Restore:
 
 ```bash
-cat smartpos_2026-04-30.sql | docker exec -i smart_pos_db psql -U "$POSTGRES_USER" -d "$POSTGRES_DB"
+cat smartpos_2026-04-30.sql | docker exec -i postgres_shared psql -U smart_pos -d smart_pos
 ```
 
-### 9) Hardening minimum yang disarankan
+Backup seluruh volume data Postgres (semua database di instance) tetap dilakukan di tingkat volume/container infra jika Anda ingin recovery penuh.
 
-- Jangan publish port Postgres ke publik (compose ini tidak publish)
-- Pastikan `.env.prod` tidak di-commit
-- Pakai HTTPS
-- Atur firewall (UFW): buka hanya 22, 80, 443
-- Rotasi `JWT_SECRET` bila perlu (akan logout semua sesi)
+### 9) Hardening minimum
+
+- Jangan publish Postgres ke publik
+- Jangan commit `.env.prod`
+- HTTPS + firewall (UFW): misalnya hanya 22, 80, 443
+- Rotasi `JWT_SECRET` akan logout semua sesi
+
+### 10) Full Docker di mesin lokal (Postgres ikut di compose)
+
+Tanpa Postgres bersama, Anda bisa menjalankan DB lokal dengan override:
+
+```bash
+docker compose -f docker-compose.prod.yml -f docker-compose.local-db.override.yml --env-file .env.prod up -d --build
+```
+
+Lihat [`docker-compose.local-db.override.yml`](docker-compose.local-db.override.yml). Untuk hybrid dev (Postgres di [`backend/docker-compose.yml`](backend/docker-compose.yml) + `mvn`/`npm`), tidak perlu file ini.
